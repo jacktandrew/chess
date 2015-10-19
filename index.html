@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<script src="utils.js"></script>
+<script src="board.js"></script>
+<script src="pieces.js"></script>
+<script src="game.js"></script>
+<script src="render.js"></script>
+<script src="setup.js"></script>
+<script>
+var board = chess.board = new chess.Board();
+var white = new chess.Pieces('white');
+var black = new chess.Pieces('black');
+chess.setup.init(board, white, black);
+chess.game = new chess.Game(board);
+</script>
+</body>
+</html>

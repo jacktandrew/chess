@@ -1,0 +1,54 @@
+* {
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-family: sans-serif;
+  -webkit-user-select: none;
+}
+
+.square {
+  width: 5rem;
+  height: 5rem;
+  border: 5px solid lemonchiffon;
+  /*display: inline-block;*/
+  float: left;
+  position: relative;
+  background-color: lemonchiffon;
+}
+
+.black {
+  background-color: green;
+  border-color: green;
+}
+
+.square.active {
+  border: 5px inset orangered;
+}
+
+
+.man {
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  margin: 0.75rem;
+  border-width: 4px;
+  border-style: inset;
+  font-size: 2em;
+  line-height: 1.5em;
+  vertical-align: middle;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.man.white {
+  background-color: #DDD;
+  border-color: white;
+  color: black;
+}
+.man.black {
+  background-color: black;
+  border-color: white;
+  color: white;
+}
+
+.man.active { border-color: orangered; }
