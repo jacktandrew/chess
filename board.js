@@ -28,16 +28,16 @@
       }
     },
     getSq: function(coords) {
-      var column = this.letters[coords[0]],
-        row = coords[1] + 1,
-        name = column + row;
+      var file = this.letters[coords[0]],
+        rank = coords[1] + 1,
+        name = file + rank;
       return this[name];
     },
-    getColor: function(column, row) {
+    getColor: function(file, rank) {
       var color = 'white',
-        columnIsOdd = column % 2,
-        rowIsOdd = row % 2;
-      if (columnIsOdd && rowIsOdd || !columnIsOdd && !rowIsOdd)
+        fileIsOdd = file % 2,
+        rankIsOdd = rank % 2;
+      if (fileIsOdd && rankIsOdd || !fileIsOdd && !rankIsOdd)
         color = 'black';
       return color;
     }

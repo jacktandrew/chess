@@ -6,8 +6,8 @@
       var boardEl = document.createElement('section');
       boardEl.className = 'board';
 
-      for (var row = 8; row > 0; row--) {
-        u.loopRow(board, row, function(square) {
+      for (var rank = 8; rank > 0; rank--) {
+        u.loopRank(board, rank, function(square) {
           var squareEl = document.createElement('div'), manEl;
 
           squareEl.classList.add('square', square.color, square.name);

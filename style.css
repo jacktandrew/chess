@@ -21,9 +21,8 @@
   border-color: green;
 }
 
-.square.active {
-  border: 5px inset orangered;
-}
+.square.active { border: 5px inset orangered; }
+.square.threatened { border: 5px inset yellow; }
 
 
 .man {

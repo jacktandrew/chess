@@ -3,28 +3,28 @@
 
   chess.setup = {
     init: function(board, white, black) {
-      var blackBackRow = this.getBackRow(black),
-        whiteBackRow = this.getBackRow(white);
+      var blackBackRank = this.getBackRank(black),
+        whiteBackRank = this.getBackRank(white);
       this.board = board;
-      this.assignBackRow(whiteBackRow, 1);
+      this.assignBackRank(whiteBackRank, 1);
       this.assignPawns(white, 2);
       this.assignPawns(black, 7);
-      this.assignBackRow(blackBackRow, 8);
+      this.assignBackRank(blackBackRank, 8);
       this.boardEl = chess.render.init(board);
       document.body.appendChild(this.boardEl);
       chess.render.styleIt(8);
     },
-    assignPawns: function(team, row) {
-      u.loopRow(this.board, row, function(square, i) {
+    assignPawns: function(team, rank) {
+      u.loopRank(this.board, rank, function(square, i) {
         square.man = team.pawn();
       });
     },
-    assignBackRow: function(team, row) {
-      u.loopRow(this.board, row, function(square, i) {
+    assignBackRank: function(team, rank) {
+      u.loopRank(this.board, rank, function(square, i) {
         square.man = team[i];
       });
     },
-    getBackRow: function(team) {
+    getBackRank: function(team) {
       return [
         team.rook(),
         team.knight(),

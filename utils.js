@@ -53,7 +53,7 @@ window.u = window.utils = {
       var result = func(val, key);
       if (result) results.push(result);
     });
-    if (u.nonEmpty(results)) return results;
+    return results;
   },
   mapObj: function(obj, func) {
     var results = {};
@@ -61,7 +61,7 @@ window.u = window.utils = {
       var result = func(val, key);
       if (result) results[key] = result;
     });
-    if (u.nonEmpty(results)) return results;
+    return results;
   },
   nonEmpty: function(obj) {
     var keys = Object.keys(obj);
@@ -73,15 +73,17 @@ window.u = window.utils = {
     else
       return u.extend({}, obj);
   },
-  loopRow: function(board, row, func) {
+  loopRank: function(board, row, func) {
     var letters = ['a','b','c','d','e','f','g','h'],
       letter, name, square;
     for (var i = 0; i < letters.length; i++) {
       letter = letters[i];
       name = letter + row;
       square = board[name];
-      // console.log('square', square  );
       func(square, i);
     }
+  },
+  hasClass: function(el, className) {
+    return el.classList.contains(className);
   }
 }

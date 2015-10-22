@@ -20,11 +20,11 @@
       [0,-1]    //  back
     ],
     whitePawn: {
-      moves: [[0,1],[0,2]],
+      advances: [[0,1],[0,2]],
       kills: [[1,1],[-1,1]]
     },
     blackPawn: {
-      moves: [[0,-1],[0,-2]],
+      advances: [[0,-1],[0,-2]],
       kills: [[1,-1],[-1,-1]]
     },
     init: function(color) {
@@ -49,7 +49,8 @@
         name: 'rook',
         color: this.color,
         moves: this.straight,
-        repeat: true
+        repeat: true,
+        abbr: 'R'
       }
     },
     knight: function() {
@@ -68,7 +69,7 @@
         ],
         repeat: false,
         jumpping: true,
-        abbr: 'n'
+        abbr: 'N'
       }
     },
     bishop: function() {
@@ -76,7 +77,8 @@
         name: 'bishop',
         color: this.color,
         moves: this.diagonal,
-        repeat: true
+        repeat: true,
+        abbr: 'B'
       }
     },
     queen: function() {
@@ -84,7 +86,8 @@
         name: 'queen',
         color: this.color,
         moves: this.all,
-        repeat: true
+        repeat: true,
+        abbr: 'Q'
       }
     },
     king: function() {
@@ -92,7 +95,8 @@
         name: 'king',
         color: this.color,
         moves: this.all,
-        repeat: false
+        repeat: false,
+        abbr: 'K'
       }
     }
   };
