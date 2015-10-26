@@ -2,9 +2,7 @@
   var chess = window.chess = window.chess || {};
 
   chess.render = {
-  	init: function(board) {
-      var boardEl = document.createElement('section');
-      boardEl.className = 'board';
+  	init: function(board, boardEl) {
 
       for (var rank = 8; rank > 0; rank--) {
         u.loopRank(board, rank, function(square) {

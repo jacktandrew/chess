@@ -33,10 +33,10 @@ window.u = window.utils = {
     return winners;
   },
   filterObj: function(obj, func) {
-    var winners = {};
+    var winners = [];
     u.each(obj, function(val, key) {
       var boole = func(val, key);
-      if (boole) winners[key] = val;
+      if (boole) winners.push(val);
     });
     // if (u.nonEmpty(winners))
     return winners;
@@ -73,14 +73,14 @@ window.u = window.utils = {
     else
       return u.extend({}, obj);
   },
-  loopRank: function(board, row, func) {
+  loopRank: function(board, rank, func) {
     var letters = ['a','b','c','d','e','f','g','h'],
       letter, name, square;
     for (var i = 0; i < letters.length; i++) {
       letter = letters[i];
-      name = letter + row;
+      name = letter + rank;
       square = board[name];
-      func(square, i);
+      func(square, i, name);
     }
   },
   hasClass: function(el, className) {

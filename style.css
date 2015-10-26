@@ -6,6 +6,11 @@
   -webkit-user-select: none;
 }
 
+.board, .log {
+  margin: 3rem;
+  float: left;
+}
+
 .square {
   width: 5rem;
   height: 5rem;
