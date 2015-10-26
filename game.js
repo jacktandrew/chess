@@ -18,22 +18,29 @@ Game.prototype = {
     document.body.addEventListener('click', this, false);
   },
   handleEvent: function(event) {
-    var el = event.target;
+    var el = event.target,
+      sq, man, child;
 
     if (u.hasClass(el, 'square')) {
-      if (el.children.length) {
-        this.capture(el.children[0]);
+      if (kids.length) {
+        this.parseEvent(sq, man);
       } else {
         this.handleSquare(el);
       }
     } else {
       if (u.hasClass(el, this.active.color)) {
         if (this.active.manEl) this.deactivate();
-        else this.handleMan(el);
+        this.handleMan(el);
       } else if (u.hasClass(el.parentElement, 'active')) {
-        this.capture(el);
+        this.parseEvent(sq, man);
       }
     }
+  },
+  parseEvent: function(sq, man) {
+    if (u.hasClass(sq, this.enemy)
+      this.capture(man);
+    else if (u.hasClass(man, man.canCastle)
+      this.completeCastle(man);
   },
   handleSquare: function(sqEl) {
     var name = sqEl.dataset.name,
@@ -134,31 +141,31 @@ Game.prototype = {
   },
   handleMan: function(manEl) {
     var sqObj = this.getObject(manEl),
-      piece = sqObj.man.name,
       active = {
         man: sqObj.man,
         manEl: manEl,
         sqObj: sqObj
-      };
-
-    manEl.classList.add('active');
+      },
+      results = this.getMoves(sqObj);
     u.extend(this.active, active);
+    this.activate(results);
+  },
+  activate: function(results) {
+    this.active.manEl.classList.add('active');
+    this.active.squares = results.filter(function(sq) {
+      if (!sq.man || sq.man.canCastleNow ||
+          sq.man.color === chess.game.enemy) {
 
-    if (piece === 'pawn') {
-      this.getPawnMoves(chess.board[manEl.parentElement.dataset.name]);
-    } else if (piece === 'king') {
-      this.getCastling();
-      this.getMoves(sqObj.coords, sqObj.man.repeat, sqObj.man.moves);
-    } else {
-      this.getMoves(sqObj.coords, sqObj.man.repeat, sqObj.man.moves);
-    }
-
-    this.activateSquares();
+        sq.el.classList.add('active');
+        return true;
+      }
+    });
   },
   deactivate: function(manEl) {
     this.active.manEl.classList.remove('active');
-    u.each(this.active.squares, function(sqObj) {
-      sqObj.el.classList.remove('active');
+    u.each(this.active.squares, function(sq) {
+      sq.el.classList.remove('active');
+      if (sq.man) sq.man.canCastleNow = false;
     });
     this.active.manEl = undefined;
     this.active.squares = [];
@@ -168,32 +175,27 @@ Game.prototype = {
       name = sqEl.dataset.name;
     return chess.board[name];
   },
-  getMoves: function(start, repeat, deltas) {
-    u.each(deltas, function(delta) {
-      var sq = chess.board.getSq([start[0]+delta[0],start[1]+delta[1]]);
-      if (!sq) return false;
-      if (!sq.man) {
-        if (repeat) chess.game.getMoves(sq.coords, repeat, [delta]);
-        chess.game.active.squares.push(sq);
-      } else if (sq.man.color === chess.game.enemy) {
-        chess.game.active.squares.push(sq);
-        chess.game.captures.push(sq);
-      }
-    });
+  getMoves: function(sq) {
+    var results, castling;
+
+    if (sq.man.name === 'pawn')
+      results = this.getPawnMoves(sq);
+    else if (sq.man.repeat)
+      results = chess.game.seekMany(sq.coords, sq.man.moves);
+    else
+      results = chess.game.seekOne(sq.coords, sq.man.moves);
+
+    if (sq.man.canCastle && !this.inCheck) {
+      castling = this.getCastling(sq);
+      results = castling.concat(results);
+    }
+
+    return results;
   },
   onHome: function(coords) {
     var team = this.active.color;
     if (team === 'white' && coords[1] === 1) return true;
     if (team === 'black' && coords[1] === 6) return true;
-  },
-  activateSquares: function() {
-    var squares = this.active.squares.filter(function(sq) {
-      if (sq) return true;
-    });
-
-    u.each(squares, function(sq) {
-      sq.el.classList.add('active');
-    });
   },
   getPawnCaptures: function(sq) {
     var enemy = this.enemy,
@@ -220,7 +222,7 @@ Game.prototype = {
       return chess.board.getSq(coord);
     });
 
-    return squares.filter(function(sq) {if (sq)return true;});
+    return squares.filter(function(sq) { if (sq) return true });
   },
   seekMany: function(p0, deltas, squares) {
     squares = squares || [];
@@ -235,37 +237,34 @@ Game.prototype = {
       }
     });
 
-    return squares;
+    return squares.filter(function(sq) { if (sq) return true });
   },
   getPawnMoves: function(sq) {
     var captures = this.getPawnCaptures(sq),
       advances = this.getPawnAdvances(sq);
-
-    this.active.squares = advances.concat(captures);
+    return advances.concat(captures);
   },
   checkForMate: function(kingSq) {
-    var proto = chess.Pieces.prototype,
-      deltas = proto.straight.concat(proto.diagonal),
-      boole = false, singles, repeats, squares, threats, real;
-
     kingSq = kingSq || this.getSqByMan('king', this.active.color);
-    singles = this.seekOne(kingSq.coords, proto.l_shaped);
-    repeats = this.seekMany(kingSq.coords, deltas);
-    squares = singles.concat(repeats);
-    threats = squares.filter(function(sq) {
-      if (sq && sq.man && sq.man.color === chess.game.enemy) return true;
-    });
-    real = threats.filter(function(sq) {
-      var deltas = sq.man.moves.captures || sq.man.moves;
+    var proto = chess.Pieces.prototype,
+      l_shaped = this.seekOne(kingSq.coords, proto.l_shaped),
+      diagonal = this.seekMany(kingSq.coords, proto.diagonal),
+      straight = this.seekMany(kingSq.coords, proto.straight),
+      squares = l_shaped.concat(diagonal, straight),
+      threats = squares.filter(function(sq) {
+        if (sq && sq.man && sq.man.color === chess.game.enemy) return true;
+      }),
+      real = threats.filter(function(sq) {
+        var deltas = sq.man.moves.captures || sq.man.moves;
 
-      if (sq.man.repeat)
-        squares = chess.game.seekMany(sq.coords, deltas);
-      else
-        squares = chess.game.seekOne(sq.coords, deltas);
+        if (sq.man.repeat)
+          squares = chess.game.seekMany(sq.coords, deltas);
+        else
+          squares = chess.game.seekOne(sq.coords, deltas);
 
-      if (squares.indexOf(kingSq) + 1) return true;
-    });
-    return real.length;
+        if (squares.indexOf(kingSq) + 1) return true;
+      });
+    return !!real.length;
   },
   getSqByMan: function(name, color) {
     var results = u.filter(chess.board, function(sq) {
@@ -283,37 +282,34 @@ Game.prototype = {
   // The king moves through a square that is attacked by a piece of the opponent.
   // The king would be in check after castling.
 
-  getCastling: function() {
-    var rank = this.active.sqObj.coords[1] + 1;
-    var left, right = [];
-    u.loopRank(chess.board, rank, function(sq, i, name) {
-      var man = sq.man,
-        obj = {};
+  getCastling: function(sqObj) {
+    var rank = sqObj.coords[1] + 1,
+      results = [], right = [],
+      left, leftObj, rightObj;
 
-      if (man) obj.occupied = true;
-      if (man && man.canCastle)
-        obj.canCastle = true;
-
-      obj.name = name;
-
-      right[i] = obj;
-    });
+    u.loopRank(chess.board, rank, function(sq) {right.push(sq)});
     //  remove 4 elements from index 0
     left = right.splice(0,4)
-    left.push(right[0]);
+    //  remove the king
+    right.shift();
     right.reverse();
-
-    this.checkCastle(left);
-    this.checkCastle(right);
+    results[0] = this.checkCastle(left);
+    results[1] = this.checkCastle(right);
+    return results.filter(function(sq) { if (sq) return true });
   },
-  checkCastle: function(arr) {
-    var l = arr.length,
-      valid = true;
-
-    u.each(arr, function(obj) {
-      var sq = chess.board[obj.name],
-        inCheck = chess.game.checkForMate(sq);
+  checkCastle: function(squares) {
+    var validSquares = squares.filter(function(sq) {
+      var inCheck = chess.game.checkForMate(sq), canCastle;
+      if (sq.man) canCastle = sq.man.canCastle;
+      if (!inCheck && !sq.man || canCastle) return true;
     });
+    if (squares.length === validSquares.length) {
+      squares[0].man.canCastleNow = true;
+      console.log(squares[0])
+      return squares.shift();
+    }
   }
+
+
 };
 })();
