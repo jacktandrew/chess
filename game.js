@@ -180,7 +180,7 @@ Game.prototype = {
     var results, castling;
 
     if (sq.man.name === 'pawn')
-      results = this.getPawnMoves(sq);
+      results = chess.pawn.getMoves(sq);
     else if (sq.man.repeat)
       results = chess.game.seekMany(sq.coords, sq.man.moves);
     else
@@ -192,30 +192,6 @@ Game.prototype = {
     }
 
     return results;
-  },
-  onHome: function(coords) {
-    var team = this.active.color;
-    if (team === 'white' && coords[1] === 1) return true;
-    if (team === 'black' && coords[1] === 6) return true;
-  },
-  getPawnCaptures: function(sq) {
-    var enemy = this.enemy,
-      possible = this.seekOne(sq.coords, sq.man.moves.captures);
-      captures = possible.filter(function(sq) {
-        if (sq && sq.man && sq.man.color === enemy) return true;
-      });
-    this.captures = this.captures.concat(captures);
-    return captures;
-  },
-  getPawnAdvances: function(sq) {
-    var onHome = this.onHome(sq.coords),
-      possible = this.seekOne(sq.coords, sq.man.moves.advances);
-
-    return possible.filter(function(move, i) {
-      if (!move) return false;
-      if (!move.man && i === 0) return true;
-      if (!move.man && onHome) return true;
-    });
   },
   seekOne: function(start, deltas) {
     var squares = deltas.map(function(delta) {
@@ -239,11 +215,6 @@ Game.prototype = {
     });
 
     return squares.filter(function(sq) { if (sq) return true });
-  },
-  getPawnMoves: function(sq) {
-    var captures = this.getPawnCaptures(sq),
-      advances = this.getPawnAdvances(sq);
-    return advances.concat(captures);
   },
   checkForMate: function(kingSq) {
     kingSq = kingSq || this.getSqByMan('king', this.active.color);
@@ -300,8 +271,9 @@ Game.prototype = {
   },
   checkCastle: function(squares) {
     var validSquares = squares.filter(function(sq, i) {
-      var inCheck = chess.game.checkForMate(sq);
-      if (!inCheck && !sq.man) return true;
+      var inCheck = chess.game.checkForMate(sq),
+        occupiedByEnemy = (sq.man && sq.man.color === chess.game.enemy);
+      if (!inCheck && (!sq.man || occupiedByEnemy)) return true;
       if (sq.man && sq.man.canCastle) return true;
     });
 
