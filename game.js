@@ -8,11 +8,9 @@ chess.Game = Game;
 Game.prototype = {
   constructor: Game,
   counter: 0,
-  logEl: document.querySelector('.log'),
   teams: ['white', 'black'],
   init: function() {
     this.captures = [];
-    this.notation = [];
     this.active = { color: this.teams[this.counter], squares: [] };
     this.enemy = this.teams[1 - this.counter];
     document.body.addEventListener('click', this, false);
@@ -57,7 +55,7 @@ Game.prototype = {
     this.movePiece(target);
     this.inCheck = this.checkForMate();
     if (this.inCheck) this.reverseMove(target);
-    else this.endTurn(sqEl);
+    else this.endTurn(sqObj);
   },
   movePiece: function(target) {
     this.active.sqObj.man.canCastle = false;
@@ -70,46 +68,15 @@ Game.prototype = {
     //  Remove man of action from starting square
     this.active.sqObj.man = undefined;
   },
-  endTurn: function(sqEl) {
-    this.noteMove(sqEl);
+  endTurn: function(sqObj) {
+    chess.notation.start(sqObj);
     this.counter = 1 - this.counter;
     this.deactivate();
     this.active = { color: this.teams[this.counter], squares: [] };
     this.enemy = this.teams[1 - this.counter];
     this.inCheck = this.checkForMate();
     this.active.squares = [];
-    this.finishNote();
-  },
-  finishNote: function() {
-
-    if (this.inCheck) this.note += '+';
-
-    if (this.whiteMove) {
-      this.notation.push([this.whiteMove, this.note]);
-      this.writeLog();
-      this.whiteMove = undefined;
-    } else {
-      this.whiteMove = this.note;
-    }
-  },
-  writeLog: function() {
-    var l = this.notation.length;
-    // console.log(l+'. '+this.whiteMove, this.note);
-    li = document.createElement('li');
-    li.textContent = this.whiteMove+' '+this.note;
-    this.logEl.appendChild(li);
-  },
-  noteMove: function(sqEl) {
-    var name = sqEl.dataset.name,
-      abbr = this.active.man.abbr || '';
-
-    if (!this.isCastling) this.note = abbr + name;
-
-    if (this.isCapture) {
-      if (!abbr) abbr = this.active.sqObj.name.slice(0,1);
-      this.note = abbr + 'x' + name;
-    }
-
+    chess.notation.finish(this.inCheck);
     this.isCastling = false;
     this.isCapture = false;
   },
