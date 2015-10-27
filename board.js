@@ -28,10 +28,13 @@
       }
     },
     getSq: function(coords) {
-      var file = this.letters[coords[0]],
+      var file = this.getFile(coords),
         rank = coords[1] + 1,
         name = file + rank;
       return this[name];
+    },
+    getFile: function(coords) {
+      return this.letters[coords[0]];
     },
     getColor: function(file, rank) {
       var color = 'white',

@@ -18,35 +18,38 @@ Game.prototype = {
     document.body.addEventListener('click', this, false);
   },
   handleEvent: function(event) {
-    var el = event.target,
-      sq, man, child;
+    var sqEl, manEl;
+    if (u.hasClass(event.target, 'square')) {
+      sqEl = event.target;
+      manEl = event.target.children[0];
+    } else if (u.hasClass(event.target, 'man')) {
+      sqEl = event.target.parentElement;
+      manEl = event.target;
+    }
 
-    if (u.hasClass(el, 'square')) {
-      if (kids.length) {
-        this.parseEvent(sq, man);
-      } else {
-        this.handleSquare(el);
-      }
-    } else {
-      if (u.hasClass(el, this.active.color)) {
-        if (this.active.manEl) this.deactivate();
-        this.handleMan(el);
-      } else if (u.hasClass(el.parentElement, 'active')) {
-        this.parseEvent(sq, man);
-      }
+    if (manEl)
+      this.parseEvent(sqEl, manEl);
+    else if (u.hasClass(sqEl, 'active'))
+      this.handleSquare(sqEl);
+  },
+  parseEvent: function(sqEl, manEl) {
+    var sqObj = this.getObject(manEl),
+      isActive = this.active.sqObj === sqObj;
+
+    if (sqObj.man.castleNow)
+      this.completeCastle(sqObj);
+    else if (sqObj.man.color === this.enemy)
+      this.capture(sqEl, manEl, sqObj);
+    else if (sqObj.man.color === this.active.color) {
+      if (this.active.manEl) this.deactivate();
+      if (!isActive) this.handleMan(manEl);
     }
   },
-  parseEvent: function(sq, man) {
-    if (u.hasClass(sq, this.enemy)
-      this.capture(man);
-    else if (u.hasClass(man, man.canCastle)
-      this.completeCastle(man);
-  },
   handleSquare: function(sqEl) {
-    var name = sqEl.dataset.name,
+    var sqObj = chess.board[sqEl.dataset.name],
       target = {
         sqEl: sqEl,
-        sqObj: chess.board[name]
+        sqObj: sqObj
       },
       validMove = this.active.squares.indexOf(target.sqObj) + 1;
 
@@ -99,13 +102,15 @@ Game.prototype = {
   noteMove: function(sqEl) {
     var name = sqEl.dataset.name,
       abbr = this.active.man.abbr || '';
-    this.note = abbr + name;
+
+    if (!this.isCastling) this.note = abbr + name;
 
     if (this.isCapture) {
       if (!abbr) abbr = this.active.sqObj.name.slice(0,1);
       this.note = abbr + 'x' + name;
     }
 
+    this.isCastling = false;
     this.isCapture = false;
   },
   reverseMove: function(target) {
@@ -120,13 +125,10 @@ Game.prototype = {
       }
     }.bind(this), 500);
   },
-  capture: function(manEl) {
-    var sqEl = manEl.parentElement,
-      sqObj = chess.board[sqEl.dataset.name],
-      isEnemy = sqObj.man.color === this.enemy,
-      isActiveSq = this.active.squares.indexOf(sqObj) + 1;
+  capture: function(sqEl, manEl, sqObj) {
+    var isActiveSq = this.active.squares.indexOf(sqObj) + 1;
 
-    if (isEnemy && isActiveSq) {
+    if (isActiveSq) {
       this.finishCapture(manEl, sqObj);
       this.handleSquare(sqEl);
     }
@@ -153,19 +155,18 @@ Game.prototype = {
   activate: function(results) {
     this.active.manEl.classList.add('active');
     this.active.squares = results.filter(function(sq) {
-      if (!sq.man || sq.man.canCastleNow ||
-          sq.man.color === chess.game.enemy) {
-
+      if (!sq.man || sq.man.castleNow || sq.man.color === chess.game.enemy) {
         sq.el.classList.add('active');
         return true;
       }
     });
+    this.active.sqObj.el.classList.remove('active');
   },
   deactivate: function(manEl) {
     this.active.manEl.classList.remove('active');
     u.each(this.active.squares, function(sq) {
       sq.el.classList.remove('active');
-      if (sq.man) sq.man.canCastleNow = false;
+      if (sq.man) sq.man.castleNow = false;
     });
     this.active.manEl = undefined;
     this.active.squares = [];
@@ -274,42 +275,70 @@ Game.prototype = {
     });
     return results[0]
   },
-  // There are a number of cases when castling is not permitted.
-  // Your king has been moved earlier in the game.
-  // The rook that castles has been moved earlier in the game.
-  // There are pieces standing between your king and rook.
-  // The king is in check.
-  // The king moves through a square that is attacked by a piece of the opponent.
-  // The king would be in check after castling.
-
   getCastling: function(sqObj) {
     var rank = sqObj.coords[1] + 1,
-      results = [], right = [],
-      left, leftObj, rightObj;
+      file = chess.board.getFile(sqObj.coords),
+      q = [], k = [],
+      kResult = [], qResult = [], results;
 
-    u.loopRank(chess.board, rank, function(sq) {right.push(sq)});
+    u.loopRank(chess.board, rank, function(sq) {q.push(sq)});
     //  remove 4 elements from index 0
-    left = right.splice(0,4)
-    //  remove the king
-    right.shift();
-    right.reverse();
-    results[0] = this.checkCastle(left);
-    results[1] = this.checkCastle(right);
+    k = q.splice(0,4)
+    //  Add King to k
+    k.push(q[0]);
+    q.reverse();
+
+    if (file === 'a' || file === 'e')
+      kResult = this.checkCastle(k);
+
+    if (file === 'h' || file === 'e')
+      qResult = this.checkCastle(q);
+
+    results = kResult.concat(qResult);
+
     return results.filter(function(sq) { if (sq) return true });
   },
   checkCastle: function(squares) {
-    var validSquares = squares.filter(function(sq) {
-      var inCheck = chess.game.checkForMate(sq), canCastle;
-      if (sq.man) canCastle = sq.man.canCastle;
-      if (!inCheck && !sq.man || canCastle) return true;
+    var validSquares = squares.filter(function(sq, i) {
+      var inCheck = chess.game.checkForMate(sq);
+      if (!inCheck && !sq.man) return true;
+      if (sq.man && sq.man.canCastle) return true;
     });
+
     if (squares.length === validSquares.length) {
-      squares[0].man.canCastleNow = true;
-      console.log(squares[0])
-      return squares.shift();
+      squares.splice(1, squares.length - 2);
+      squares[0].man.castleNow = true;
+      squares[1].man.castleNow = true;
+      return squares;
     }
+    return [];
+  },
+  completeCastle: function(sqObj) {
+    var clone = u.clone(sqObj.man),
+      sq1 = this.active.sqObj.el,
+      sq2 = sqObj.el,
+      man1 = sq1.children[0],
+      man2 = sq2.children[0],
+      f1 = this.active.sqObj.coords[0],
+      f2 = sqObj.coords[0];
+
+    sq1.appendChild(man2);
+    sq2.appendChild(man1);
+
+    console.log(sqObj);
+    console.log(this.active.sqObj);
+
+    sqObj.man = this.active.sqObj.man;
+    this.active.sqObj.man = clone;
+
+    sqObj.man.canCastle = false;
+    this.active.sqObj.man.canCastle = false;
+
+    if (f1 === 0 || f2 === 0) this.note = '0-0-0';
+    if (f1 === 7 || f2 === 7) this.note = '0-0';
+    this.isCastling = true;
+
+    this.endTurn(sqObj.el);
   }
-
-
 };
 })();
