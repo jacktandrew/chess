@@ -3,29 +3,39 @@ window.chess.notation = {
   logEl: document.querySelector('.log'),
   start: function(sqObj) {
     var sq = sqObj.name,
-      man = sqObj.man.abbr || '';
+      man = sqObj.man.abbr || '',
+      f1 = chess.game.active.sqObj.coords[0],
+      f2 = sqObj.coords[0],
+      note = man + sq;
 
-    if (!chess.game.isCastling) this.note = man + sq;
-    if (chess.game.isCapture) this.note = man + 'x' + sq;
+    if (chess.game.isCastling) {
+      if (f1 === 0 || f2 === 0) note = '0-0-0';
+      if (f1 === 7 || f2 === 7) note = '0-0';
+    } else if (chess.game.isCapture) {
+      note = man + 'x' + sq;
+    }
+
+    return note;
   },
-  finish: function(inCheck) {
-    if (inCheck) this.note += '+';
+  finish: function(note, inCheck) {
+    var move = [this.previous, note];
+    if (inCheck) note += '+';
 
-    if (this.whiteMove) {
-      this.notes.push([this.whiteMove, this.note]);
-      this.write();
-      this.whiteMove = undefined;
+    if (this.previous) {
+      this.notes.push(move);
+      this.write(move);
+      this.previous = undefined;
     } else {
-      this.whiteMove = this.note;
+      this.previous = note;
     }
   },
-  write: function() {
+  write: function(move) {
     var li = document.createElement('li');
-    li.textContent = this.whiteMove+' '+this.note;
+    li.textContent = move[0]+' '+move[1];
     this.logEl.appendChild(li);
   },
   log: function() {
-    var l = this.notes.length;
-    console.log(l+'. '+this.whiteMove, this.note);
+    // var l = this.notes.length;
+    // console.log(l+'. '+this.previous, this.note);
   }
 };

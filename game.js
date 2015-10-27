@@ -35,7 +35,7 @@ Game.prototype = {
       isActive = this.active.sqObj === sqObj;
 
     if (sqObj.man.castleNow)
-      this.completeCastle(sqObj);
+      chess.castling.complete(sqObj);
     else if (sqObj.man.color === this.enemy)
       this.capture(sqEl, manEl, sqObj);
     else if (sqObj.man.color === this.active.color) {
@@ -69,14 +69,14 @@ Game.prototype = {
     this.active.sqObj.man = undefined;
   },
   endTurn: function(sqObj) {
-    chess.notation.start(sqObj);
+    var note = chess.notation.start(sqObj);
     this.counter = 1 - this.counter;
     this.deactivate();
     this.active = { color: this.teams[this.counter], squares: [] };
     this.enemy = this.teams[1 - this.counter];
     this.inCheck = this.checkForMate();
     this.active.squares = [];
-    chess.notation.finish(this.inCheck);
+    chess.notation.finish(note, this.inCheck);
     this.isCastling = false;
     this.isCapture = false;
   },
@@ -154,7 +154,7 @@ Game.prototype = {
       results = chess.game.seekOne(sq.coords, sq.man.moves);
 
     if (sq.man.canCastle && !this.inCheck) {
-      castling = this.getCastling(sq);
+      castling = chess.castling.get(sq);
       results = castling.concat(results);
     }
 
@@ -212,72 +212,6 @@ Game.prototype = {
         return true;
     });
     return results[0]
-  },
-  getCastling: function(sqObj) {
-    var rank = sqObj.coords[1] + 1,
-      file = chess.board.getFile(sqObj.coords),
-      q = [], k = [],
-      kResult = [], qResult = [], results;
-
-    u.loopRank(chess.board, rank, function(sq) {q.push(sq)});
-    //  remove 4 elements from index 0
-    k = q.splice(0,4)
-    //  Add King to k
-    k.push(q[0]);
-    q.reverse();
-
-    if (file === 'a' || file === 'e')
-      kResult = this.checkCastle(k);
-
-    if (file === 'h' || file === 'e')
-      qResult = this.checkCastle(q);
-
-    results = kResult.concat(qResult);
-
-    return results.filter(function(sq) { if (sq) return true });
-  },
-  checkCastle: function(squares) {
-    var validSquares = squares.filter(function(sq, i) {
-      var inCheck = chess.game.checkForMate(sq),
-        occupiedByEnemy = (sq.man && sq.man.color === chess.game.enemy);
-      if (!inCheck && (!sq.man || occupiedByEnemy)) return true;
-      if (sq.man && sq.man.canCastle) return true;
-    });
-
-    if (squares.length === validSquares.length) {
-      squares.splice(1, squares.length - 2);
-      squares[0].man.castleNow = true;
-      squares[1].man.castleNow = true;
-      return squares;
-    }
-    return [];
-  },
-  completeCastle: function(sqObj) {
-    var clone = u.clone(sqObj.man),
-      sq1 = this.active.sqObj.el,
-      sq2 = sqObj.el,
-      man1 = sq1.children[0],
-      man2 = sq2.children[0],
-      f1 = this.active.sqObj.coords[0],
-      f2 = sqObj.coords[0];
-
-    sq1.appendChild(man2);
-    sq2.appendChild(man1);
-
-    console.log(sqObj);
-    console.log(this.active.sqObj);
-
-    sqObj.man = this.active.sqObj.man;
-    this.active.sqObj.man = clone;
-
-    sqObj.man.canCastle = false;
-    this.active.sqObj.man.canCastle = false;
-
-    if (f1 === 0 || f2 === 0) this.note = '0-0-0';
-    if (f1 === 7 || f2 === 7) this.note = '0-0';
-    this.isCastling = true;
-
-    this.endTurn(sqObj.el);
   }
 };
 })();
