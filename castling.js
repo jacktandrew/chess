@@ -12,11 +12,8 @@ window.chess.castling = {
     k.push(q[0]);
     q.reverse();
 
-    if (file === 'a' || file === 'e')
-      kResult = this.check(k);
-
-    if (file === 'h' || file === 'e')
-      qResult = this.check(q);
+    if (file === 'a' || file === 'e') kResult = this.check(k);
+    if (file === 'h' || file === 'e') qResult = this.check(q);
 
     results = kResult.concat(qResult);
 
@@ -55,7 +52,6 @@ window.chess.castling = {
     chess.game.active.sqObj.man.canCastle = false;
 
     chess.game.isCastling = true;
-
     chess.game.endTurn(sqObj);
   }
 };

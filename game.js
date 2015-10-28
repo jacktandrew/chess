@@ -153,7 +153,7 @@ Game.prototype = {
     else
       results = chess.game.seekOne(sq.coords, sq.man.moves);
 
-    if (sq.man.canCastle && !this.inCheck) {
+    if (sq.man.name === 'king' && !this.inCheck) {
       castling = chess.castling.get(sq);
       results = castling.concat(results);
     }
