@@ -49,11 +49,13 @@ Game.prototype = {
         sqEl: sqEl,
         sqObj: sqObj
       },
-      validMove = this.active.squares.indexOf(target.sqObj) + 1;
+      validMove = this.active.squares.indexOf(target.sqObj) + 1,
+      enPassant = chess.pawn.enPassant.moveSq === target.sqObj;
 
     if (!validMove) return false;
     this.movePiece(target);
     this.inCheck = this.checkForMate();
+    if (enPassant) chess.pawn.completePass();
     if (this.inCheck) this.reverseMove(target);
     else this.endTurn(sqObj);
   },
@@ -69,16 +71,17 @@ Game.prototype = {
     this.active.sqObj.man = undefined;
   },
   endTurn: function(sqObj) {
-    var note = chess.notation.start(sqObj);
+    chess.notation.start(sqObj);
     this.counter = 1 - this.counter;
     this.deactivate();
     this.active = { color: this.teams[this.counter], squares: [] };
     this.enemy = this.teams[1 - this.counter];
     this.inCheck = this.checkForMate();
     this.active.squares = [];
-    chess.notation.finish(note, this.inCheck);
+    chess.notation.finish(this.inCheck);
     this.isCastling = false;
     this.isCapture = false;
+    chess.pawn.enPassant = {};
   },
   reverseMove: function(target) {
     setTimeout(function() {
@@ -135,6 +138,7 @@ Game.prototype = {
       sq.el.classList.remove('active');
       if (sq.man) sq.man.castleNow = false;
     });
+    this.active.sqObj = {};
     this.active.manEl = undefined;
     this.active.squares = [];
   },

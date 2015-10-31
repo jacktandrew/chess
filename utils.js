@@ -1,4 +1,10 @@
 window.u = window.utils = {
+  combine: function(arr1, arr2) {
+    u.each(arr1, function(val1, i) {
+      arr2[i] = arr2[i] + val1;
+    });
+    return arr2;
+  },
   extend: function() {
     var target = [].shift.call(arguments);
     u.each(arguments, function(obj) {

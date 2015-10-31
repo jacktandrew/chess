@@ -1,4 +1,5 @@
 window.chess.pawn = {
+  enPassant: {},
   onHome: function(coords) {
     var team = chess.game.active.color;
     if (team === 'white' && coords[1] === 1) return true;
@@ -6,8 +7,9 @@ window.chess.pawn = {
   },
   getMoves: function(sq) {
     var captures = this.getCaptures(sq),
-      advances = this.getAdvances(sq);
-    return advances.concat(captures);
+      advances = this.getAdvances(sq),
+      enPassant = this.getEnPassant(sq);
+    return advances.concat(captures, enPassant);
   },
   getCaptures: function(sq) {
     var enemy = chess.game.enemy,
@@ -27,5 +29,40 @@ window.chess.pawn = {
       if (!move.man && i === 0) return true;
       if (!move.man && onHome) return true;
     });
+  },
+  getEnPassant: function(sq) {
+    var onRank = false,
+      captures = chess.game.seekOne(sq.coords, sq.man.moves.captures),
+      passes = chess.game.seekOne(sq.coords, [[1,0],[-1,0]]),
+      previous = chess.board[chess.notation.previous],
+      i, move = [];
+
+    if (sq.man.color === 'white' && sq.coords[1] === 4) onRank = true;
+    else if (sq.man.color === 'black' && sq.coords[1] === 3) onRank = true;
+
+    if (onRank) {
+      i = passes.indexOf(previous);
+      if (i + 1) {
+        move[0] = captures[i];
+        this.enPassant = {
+          moveSq: captures[i],
+          manSq: previous
+        };
+      }
+    } else {
+      this.enPassant = {};
+    }
+
+    return move;
+  },
+  completePass: function() {
+    var sqObj = this.enPassant.manSq,
+      manEl = sqObj.el.children[0];
+
+    chess.game.finishCapture(manEl, sqObj);
   }
 };
+
+
+      // if (leftSq === chess.board[chess.notation.previous]) moves.push(leftSq);
+      // if (rightSq === chess.board[chess.notation.previous]) moves.push(rightSq);

@@ -36,6 +36,11 @@
     getFile: function(coords) {
       return this.letters[coords[0]];
     },
+    getName: function(coords) {
+      var file = this.getFile(coords),
+        rank = coords[1] + 1;
+      return file + rank;
+    },
     getColor: function(file, rank) {
       var color = 'white',
         fileIsOdd = file % 2,

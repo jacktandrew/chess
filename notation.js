@@ -1,5 +1,7 @@
 window.chess.notation = {
   notes: [],
+  current: {},
+  previous: {},
   logEl: document.querySelector('.log'),
   start: function(sqObj) {
     var sq = sqObj.name,
@@ -8,6 +10,8 @@ window.chess.notation = {
       f2 = sqObj.coords[0],
       note = man + sq;
 
+    this.color = sqObj.man.color;
+
     if (chess.game.isCastling) {
       if (f1 === 0 || f2 === 0) note = '0-0-0';
       if (f1 === 7 || f2 === 7) note = '0-0';
@@ -15,19 +19,17 @@ window.chess.notation = {
       note = man + 'x' + sq;
     }
 
-    return note;
+    this.current = note;
   },
-  finish: function(note, inCheck) {
-    var move = [this.previous, note];
-    if (inCheck) note += '+';
+  finish: function(inCheck) {
+    if (inCheck) this.current += '+';
 
-    if (this.previous) {
-      this.notes.push(move);
-      this.write(move);
-      this.previous = undefined;
-    } else {
-      this.previous = note;
+    if (this.color === 'black') {
+      this.notes.push([this.previous, this.current]);
+      this.write([this.previous, this.current]);
     }
+
+    this.previous = this.current;
   },
   write: function(move) {
     var li = document.createElement('li');
