@@ -54,9 +54,9 @@ Game.prototype = {
 
     if (!validMove) return false;
     this.movePiece(target);
-    this.inCheck = this.checkForMate();
+    this.inCheck = chess.check.get();
     if (enPassant) chess.pawn.completePass();
-    if (this.inCheck) this.reverseMove(target);
+    if (this.inCheck) chess.check.reverseMove(target);
     else this.endTurn(sqObj);
   },
   movePiece: function(target) {
@@ -76,24 +76,12 @@ Game.prototype = {
     this.deactivate();
     this.active = { color: this.teams[this.counter], squares: [] };
     this.enemy = this.teams[1 - this.counter];
-    this.inCheck = this.checkForMate();
+    this.inCheck = chess.check.get();
     this.active.squares = [];
     chess.notation.finish(this.inCheck);
     this.isCastling = false;
     this.isCapture = false;
     chess.pawn.enPassant = {};
-  },
-  reverseMove: function(target) {
-    setTimeout(function() {
-      this.active.sqObj.man = this.active.man;
-      this.active.sqObj.el.appendChild(this.active.manEl);
-      target.sqObj.man = undefined;
-      if (this.isCapture) {
-        target.sqObj.man = this.capturedMan;
-        target.sqObj.el.appendChild(this.capturedEl);
-        this.isCapture = false;
-      }
-    }.bind(this), 500);
   },
   capture: function(sqEl, manEl, sqObj) {
     var isActiveSq = this.active.squares.indexOf(sqObj) + 1;
@@ -186,36 +174,6 @@ Game.prototype = {
     });
 
     return squares.filter(function(sq) { if (sq) return true });
-  },
-  checkForMate: function(kingSq) {
-    kingSq = kingSq || this.getSqByMan('king', this.active.color);
-    var proto = chess.Pieces.prototype,
-      l_shaped = this.seekOne(kingSq.coords, proto.l_shaped),
-      diagonal = this.seekMany(kingSq.coords, proto.diagonal),
-      straight = this.seekMany(kingSq.coords, proto.straight),
-      squares = l_shaped.concat(diagonal, straight),
-      threats = squares.filter(function(sq) {
-        if (sq && sq.man && sq.man.color === chess.game.enemy) return true;
-      }),
-      real = threats.filter(function(sq) {
-        var deltas = sq.man.moves.captures || sq.man.moves;
-
-        if (sq.man.repeat)
-          squares = chess.game.seekMany(sq.coords, deltas);
-        else
-          squares = chess.game.seekOne(sq.coords, deltas);
-
-        if (squares.indexOf(kingSq) + 1) return true;
-      });
-    return !!real.length;
-  },
-  getSqByMan: function(name, color) {
-    var results = u.filter(chess.board, function(sq) {
-      var man = sq.man || {};
-      if (man.color === color && man.name === name)
-        return true;
-    });
-    return results[0]
   }
 };
 })();
