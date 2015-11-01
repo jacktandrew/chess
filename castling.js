@@ -27,6 +27,19 @@ window.chess.castling = {
     }
   },
   moveRook: function(sqObj) {
-    console.log(sqObj.name);
+    var middleOfBoard = 4,
+      rank = sqObj.coords[1],
+      file = sqObj.coords[0],
+      delta = Math.sign(middleOfBoard - file),
+      queenSideSq = chess.board.getSq([0, rank]),
+      kingSideSq = chess.board.getSq([7, rank]),
+      dstCoords = u.combine(sqObj.coords, [delta, 0]),
+      dstSq = chess.board.getSq(dstCoords),
+      srcSq;
+
+    if (file < middleOfBoard) srcSq = queenSideSq;
+    if (file > middleOfBoard) srcSq = kingSideSq;
+
+    chess.game.movePiece(srcSq, dstSq);
   }
 };

@@ -43,32 +43,27 @@ Game.prototype = {
   },
   handleSquare: function(sqEl) {
     var sqObj = chess.board[sqEl.dataset.name],
-      target = {
-        sqEl: sqEl,
-        sqObj: sqObj
-      },
-      validMove = this.active.squares.indexOf(target.sqObj) + 1,
-      enPassant = chess.pawn.enPassant.moveSq === target.sqObj,
+      validMove = this.active.squares.indexOf(sqObj) + 1,
+      enPassant = chess.pawn.enPassant.moveSq === sqObj,
       castling = sqObj.castling === true;
 
     if (!validMove) return false;
-    this.movePiece(target);
+    this.movePiece(this.active.sqObj, sqObj);
     this.inCheck = chess.check.get();
     if (castling) chess.castling.moveRook(sqObj);
     if (enPassant) chess.pawn.completePass();
-    if (this.inCheck) chess.check.reverseMove(target);
+    if (this.inCheck) chess.check.reverseMove(sqObj);
     else this.endTurn(sqObj);
   },
-  movePiece: function(target) {
-    this.active.sqObj.man.canCastle = false;
-    //  Put man on target square in model
-    target.sqObj.man = this.active.sqObj.man;
+  movePiece: function(srcObj, dstObj) {
+    srcObj.man.canCastle = false;
 
     //  Put man on target square in HTML
-    target.sqObj.el.appendChild(this.active.manEl);
+    dstObj.el.appendChild(srcObj.el.children[0]);
 
-    //  Remove man of action from starting square
-    this.active.sqObj.man = undefined;
+    //  Update model
+    dstObj.man = srcObj.man;
+    srcObj.man = undefined;
   },
   endTurn: function(sqObj) {
     chess.notation.start(sqObj);

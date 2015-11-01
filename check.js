@@ -48,14 +48,14 @@ window.chess.check = {
       });
     if (real.length) return real;
   },
-  reverseMove: function(target) {
+  reverseMove: function(sqObj) {
     setTimeout(function() {
       chess.game.active.sqObj.man = chess.game.active.man;
       chess.game.active.sqObj.el.appendChild(chess.game.active.manEl);
-      target.sqObj.man = undefined;
+      sqObj.man = undefined;
       if (chess.game.isCapture) {
-        target.sqObj.man = chess.game.capturedMan;
-        target.sqObj.el.appendChild(chess.game.capturedEl);
+        sqObj.man = chess.game.capturedMan;
+        sqObj.el.appendChild(chess.game.capturedEl);
         chess.game.isCapture = false;
       }
     }, 500);
