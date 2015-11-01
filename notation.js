@@ -8,6 +8,7 @@ window.chess.notation = {
       man = sqObj.man.abbr || '',
       f1 = chess.game.active.sqObj.coords[0],
       f2 = sqObj.coords[0],
+      fileName = chess.game.active.sqObj.name[0],
       note = man + sq;
 
     this.color = sqObj.man.color;
@@ -17,6 +18,7 @@ window.chess.notation = {
       if (f1 === 7 || f2 === 7) note = '0-0';
     } else if (chess.game.isCapture) {
       note = man + 'x' + sq;
+      if (!man) note = fileName + 'x' + sq;
     }
 
     this.current = note;
