@@ -2,6 +2,24 @@
   var chess = window.chess = window.chess || {};
 
   chess.render = {
+    pieces: {
+      white: {
+        king: '&#9812;',
+        queen: '&#9813;',
+        rook: '&#9814;',
+        bishop: '&#9815;',
+        knight: '&#9816;',
+        pawn: '&#9817;'
+      },
+      black: {
+        king: '&#9818;',
+        queen: '&#9819;',
+        rook: '&#9820;',
+        bishop: '&#9821;',
+        knight: '&#9822;',
+        pawn: '&#9823;'
+      }
+    },
   	init: function(board, boardEl) {
 
       for (var rank = 8; rank > 0; rank--) {
@@ -25,8 +43,8 @@
     },
     getManEl: function(man) {
       var manEl = document.createElement('figure'),
-        abbr = man.abbr || man.name.slice(0,1);
-      manEl.textContent = abbr;
+        character = this.pieces[man.color][man.name];
+      manEl.innerHTML = character;
       manEl.dataset.name = man.name;
       manEl.classList.add('man', man.color, man.name);
       return manEl;

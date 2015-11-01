@@ -34,9 +34,7 @@ Game.prototype = {
     var sqObj = this.getObject(manEl),
       isActive = this.active.sqObj === sqObj;
 
-    if (sqObj.man.castleNow)
-      chess.castling.complete(sqObj);
-    else if (sqObj.man.color === this.enemy)
+    if (sqObj.man.color === this.enemy)
       this.capture(sqEl, manEl, sqObj);
     else if (sqObj.man.color === this.active.color) {
       if (this.active.manEl) this.deactivate();
@@ -50,11 +48,13 @@ Game.prototype = {
         sqObj: sqObj
       },
       validMove = this.active.squares.indexOf(target.sqObj) + 1,
-      enPassant = chess.pawn.enPassant.moveSq === target.sqObj;
+      enPassant = chess.pawn.enPassant.moveSq === target.sqObj,
+      castling = sqObj.castling === true;
 
     if (!validMove) return false;
     this.movePiece(target);
     this.inCheck = chess.check.get();
+    if (castling) chess.castling.moveRook(sqObj);
     if (enPassant) chess.pawn.completePass();
     if (this.inCheck) chess.check.reverseMove(target);
     else this.endTurn(sqObj);
@@ -79,7 +79,6 @@ Game.prototype = {
     this.inCheck = chess.check.get();
     this.active.squares = [];
     chess.notation.finish(this.inCheck);
-    this.isCastling = false;
     this.isCapture = false;
     chess.pawn.enPassant = {};
   },
@@ -113,7 +112,7 @@ Game.prototype = {
   activate: function(results) {
     this.active.manEl.classList.add('active');
     this.active.squares = results.filter(function(sq) {
-      if (!sq.man || sq.man.castleNow || sq.man.color === chess.game.enemy) {
+      if (!sq.man || sq.man.color === chess.game.enemy) {
         sq.el.classList.add('active');
         return true;
       }
@@ -124,7 +123,6 @@ Game.prototype = {
     this.active.manEl.classList.remove('active');
     u.each(this.active.squares, function(sq) {
       sq.el.classList.remove('active');
-      if (sq.man) sq.man.castleNow = false;
     });
     this.active.sqObj = {};
     this.active.manEl = undefined;

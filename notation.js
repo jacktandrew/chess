@@ -6,9 +6,9 @@ window.chess.notation = {
   start: function(sqObj) {
     var sq = sqObj.name,
       man = sqObj.man.abbr || '',
+      fileName = chess.game.active.sqObj.name[0],
       f1 = chess.game.active.sqObj.coords[0],
       f2 = sqObj.coords[0],
-      fileName = chess.game.active.sqObj.name[0],
       note = man + sq;
 
     this.color = sqObj.man.color;
