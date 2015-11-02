@@ -1,9 +1,12 @@
 window.chess.pawn = {
   enPassant: {},
+  home: {
+    white: 1,
+    black: 6
+  },
   onHome: function(coords) {
-    var team = chess.game.active.color;
-    if (team === 'white' && coords[1] === 1) return true;
-    if (team === 'black' && coords[1] === 6) return true;
+    var team = chess.game.turn.color;
+    if (this.home[team] === coords[1]) return true;
   },
   getMoves: function(sq) {
     var captures = this.getCaptures(sq),
@@ -12,7 +15,7 @@ window.chess.pawn = {
     return advances.concat(captures, enPassant);
   },
   getCaptures: function(sq) {
-    var enemy = chess.game.enemy,
+    var enemy = chess.game.turn.enemy,
       possible = chess.game.seekOne(sq.coords, sq.man.moves.captures);
       captures = possible.filter(function(sq) {
         if (sq && sq.man && sq.man.color === enemy) return true;
@@ -62,7 +65,3 @@ window.chess.pawn = {
     chess.game.finishCapture(manEl, sqObj);
   }
 };
-
-
-      // if (leftSq === chess.board[chess.notation.previous]) moves.push(leftSq);
-      // if (rightSq === chess.board[chess.notation.previous]) moves.push(rightSq);

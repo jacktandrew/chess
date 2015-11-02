@@ -1,0 +1,39 @@
+.square::before {
+  position: absolute;
+  left: 40%;
+}
+
+.square::after {
+  position: absolute;
+  top: 40%;
+}
+
+.a8::before, .b8::before, .c8::before, .d8::before, .e8::before,
+.f8::before, .g8::before, .h8::before { top: -1.75rem; }
+
+.a1::before, .b1::before, .c1::before, .d1::before, .e1::before,
+.f1::before, .g1::before, .h1::before { bottom: -1.75rem; }
+
+.a1::after, .a2::after, .a3::after, .a4::after, .a5::after,
+.a6::after, .a7::after, .a8::after { left: -1.75rem; }
+
+.h1::after, .h2::after, .h3::after, .h4::after, .h5::after,
+.h6::after, .h7::after, .h8::after { right: -1.75rem; }
+
+.a8::before, .a1::before { content: "A"; }
+.b8::before, .b1::before { content: "B"; }
+.c8::before, .c1::before { content: "C"; }
+.d8::before, .d1::before { content: "D"; }
+.e8::before, .e1::before { content: "E"; }
+.f8::before, .f1::before { content: "F"; }
+.g8::before, .g1::before { content: "G"; }
+.h8::before, .h1::before { content: "H"; }
+
+.a1::after, .h1::after { content: "1"; }
+.a2::after, .h2::after { content: "2"; }
+.a3::after, .h3::after { content: "3"; }
+.a4::after, .h4::after { content: "4"; }
+.a5::after, .h5::after { content: "5"; }
+.a6::after, .h6::after { content: "6"; }
+.a7::after, .h7::after { content: "7"; }
+.a8::after, .h8::after { content: "8"; }

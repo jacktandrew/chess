@@ -9,7 +9,7 @@ window.chess.check = {
     return results[0]
   },
   get: function(kingSq) {
-    kingSq = kingSq || this.getSqByMan('king', chess.game.active.color);
+    kingSq = kingSq || this.getSqByMan('king', chess.game.turn.color);
     var threats = this.inquire(kingSq),
       hasUncheck;
 
@@ -21,10 +21,10 @@ window.chess.check = {
     return threats;
   },
   alertMate: function() {
-    alert(chess.game.active.color+'... You lost... '+' Congrats '+chess.game.enemy);
+    alert(chess.game.turn.color+'... You lost... '+' Congrats '+chess.game.turn.enemy);
   },
   inquire: function(kingSq) {
-    return this.seekThreats(kingSq, chess.game.enemy);
+    return this.seekThreats(kingSq, chess.game.turn.enemy);
   },
   seekThreats: function(target, enemy, moveType) {
     moveType = moveType || 'captures';
@@ -49,7 +49,7 @@ window.chess.check = {
     if (real.length) return real;
   },
   reverseMove: function(srcObj, dstObj) {
-    var kingObj = this.getSqByMan('king', chess.game.active.color),
+    var kingObj = this.getSqByMan('king', chess.game.turn.color),
       kingEl = kingObj.el.children[0];
     kingEl.classList.add('active');
     chess.game.deactivate();
@@ -57,10 +57,10 @@ window.chess.check = {
       srcObj.el.appendChild(dstObj.el.children[0]);
       srcObj.man = dstObj.man;
       dstObj.man = undefined;
-      if (chess.game.isCapture) {
+      if (chess.game.turn.isCapture) {
         dstObj.man = chess.game.capturedMan;
         dstObj.el.appendChild(chess.game.capturedEl);
-        chess.game.isCapture = false;
+        chess.game.turn.isCapture = false;
       }
       chess.game.deactivate();
       kingEl.classList.remove('active');
@@ -78,13 +78,13 @@ window.chess.check = {
   getCaptureOfThreat: function(threats) {
     var captures = [];
     u.each(threats, function(threat) {
-      var capture = chess.check.seekThreats(threat, chess.game.active.color);
+      var capture = chess.check.seekThreats(threat, chess.game.turn.color);
       if (capture) captures = captures.concat(capture);
     });
     if (captures.length) return captures;
   },
   getBlockOfThreat: function(kingSq, threats) {
-    var active = chess.game.active.color,
+    var active = chess.game.turn.color,
       paths = [], blockers = [];
 
     u.each(threats, function(threat) {

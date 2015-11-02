@@ -16,7 +16,7 @@ window.chess.castling = {
   check: function(squares) {
     var validSquares = squares.filter(function(sq, i) {
       var inCheck = chess.check.inquire(sq),
-        occupiedByEnemy = (sq.man && sq.man.color === chess.game.enemy);
+        occupiedByEnemy = (sq.man && sq.man.color === chess.game.turn.enemy);
       if (!inCheck && (!sq.man || occupiedByEnemy)) return true;
       if (sq.man && sq.man.canCastle) return true;
     });

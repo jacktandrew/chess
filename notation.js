@@ -3,33 +3,31 @@ window.chess.notation = {
   current: undefined,
   previous: undefined,
   logEl: document.querySelector('.log'),
-  start: function(sqObj) {
-    var sq = sqObj.name,
-      abbr = sqObj.man.abbr || '',
-      fileName = chess.game.active.sqObj.name[0],
-      note;
+  record: function(sqObj, inCheck) {
+    if (!this.current) this.current = this.getNote(sqObj);
 
-    this.color = sqObj.man.color;
-
-    if (chess.game.isCapture) {
-      note = abbr + 'x' + sqObj.name;
-      if (!abbr) note = fileName + 'x' + sqObj.name;
-    } else {
-      note = abbr + sqObj.name;
-    }
-
-    if (!this.current) this.current = note;
-  },
-  finish: function(inCheck) {
     if (inCheck) this.current += '+';
 
-    if (this.color === 'black') {
+    if (sqObj.man.color === 'black') {
       this.notes.push([this.previous, this.current]);
       this.write([this.previous, this.current]);
     }
 
     this.previous = this.current;
     this.current = undefined;
+  },
+  getNote: function(sqObj) {
+    var abbr = sqObj.man.abbr || '',
+      fileName = chess.game.turn.sqObj.name[0];
+
+    if (chess.game.turn.isCapture) {
+      note = abbr + 'x' + sqObj.name;
+      if (!abbr) note = fileName + 'x' + sqObj.name;
+    } else {
+      note = abbr + sqObj.name;
+    }
+
+    return note;
   },
   write: function(move) {
     var li = document.createElement('li');

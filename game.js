@@ -11,17 +11,22 @@ Game.prototype = {
   teams: ['white', 'black'],
   init: function() {
     this.captures = [];
-    this.active = {
+    this.resetTurn();
+    document.body.addEventListener('click', this, false);
+  },
+  resetTurn: function() {
+    this.turn = {
+      enemy: this.teams[1 - this.counter],
       color: this.teams[this.counter],
       squares: [],
       castling: []
     };
-    this.enemy = this.teams[1 - this.counter];
-    document.body.addEventListener('click', this, false);
   },
   handleEvent: function(event) {
     var sqEl, manEl;
-    if (u.hasClass(event.target, 'square')) {
+    if (u.hasClass(event.target, 'promotion')) {
+      return chess.promotion.finish(event.target);
+    } else if (u.hasClass(event.target, 'square')) {
       sqEl = event.target;
       manEl = event.target.children[0];
     } else if (u.hasClass(event.target, 'man')) {
@@ -36,27 +41,27 @@ Game.prototype = {
   },
   parseEvent: function(sqEl, manEl) {
     var sqObj = this.getObject(manEl),
-      isActive = this.active.sqObj === sqObj;
+      isActive = this.turn.sqObj === sqObj;
 
-    if (sqObj.man.color === this.enemy)
+    if (sqObj.man.color === this.turn.enemy)
       this.capture(sqEl, manEl, sqObj);
-    else if (sqObj.man.color === this.active.color) {
-      if (this.active.manEl) this.deactivate();
+    else if (sqObj.man.color === this.turn.color) {
+      if (this.turn.manEl) this.deactivate();
       if (!isActive) this.handleMan(manEl);
     }
   },
   handleSquare: function(sqEl) {
     var sqObj = chess.board[sqEl.dataset.name],
-      validMove = this.active.squares.indexOf(sqObj) + 1,
+      validMove = this.turn.squares.indexOf(sqObj) + 1,
       enPassant = chess.pawn.enPassant.moveSq === sqObj,
-      castling = this.active.castling.indexOf(sqObj) + 1;
+      castling = this.turn.castling.indexOf(sqObj) + 1;
 
     if (!validMove) return false;
-    this.movePiece(this.active.sqObj, sqObj);
+    this.movePiece(this.turn.sqObj, sqObj);
     this.inCheck = chess.check.get();
     if (castling) chess.castling.moveRook(sqObj);
     if (enPassant) chess.pawn.completePass();
-    if (this.inCheck) chess.check.reverseMove(this.active.sqObj, sqObj);
+    if (this.inCheck) chess.check.reverseMove(this.turn.sqObj, sqObj);
     else this.endTurn(sqObj);
   },
   movePiece: function(srcObj, dstObj) {
@@ -70,20 +75,16 @@ Game.prototype = {
   endTurn: function(sqObj) {
     chess.promotion.inquire(sqObj);
     sqObj.man.canCastle = false;
-    chess.notation.start(sqObj);
-    this.counter = 1 - this.counter;
-    this.deactivate();
-    this.active = { color: this.teams[this.counter], squares: [] };
-    this.enemy = this.teams[1 - this.counter];
+
     this.inCheck = chess.check.get();
-    this.active.squares = [];
-    this.active.castling = [];
-    chess.notation.finish(this.inCheck);
-    this.isCapture = false;
+    this.counter = 1 - this.counter;
+    chess.notation.record(sqObj, this.inCheck);
+
+    this.deactivate();
     chess.pawn.enPassant = {};
   },
   capture: function(sqEl, manEl, sqObj) {
-    var isActiveSq = this.active.squares.indexOf(sqObj) + 1;
+    var isActiveSq = this.turn.squares.indexOf(sqObj) + 1;
 
     if (isActiveSq) {
       this.finishCapture(manEl, sqObj);
@@ -91,12 +92,12 @@ Game.prototype = {
     }
   },
   finishCapture: function(manEl, sqObj) {
-    this.active.man = sqObj.man;
+    this.turn.man = sqObj.man;
     this.capturedEl = manEl;
     this.capturedMan = sqObj.man;
     sqObj.el.removeChild(manEl);
     sqObj.man = undefined;
-    this.isCapture = true;
+    this.turn.isCapture = true;
   },
   handleMan: function(manEl) {
     var sqObj = this.getObject(manEl),
@@ -106,30 +107,28 @@ Game.prototype = {
         sqObj: sqObj
       },
       results = this.getMoves(sqObj);
-    u.extend(this.active, active);
+    u.extend(this.turn, active);
     this.activate(results);
   },
   activate: function(results) {
-    this.active.manEl.classList.add('active');
-    this.active.squares = results.filter(function(sq) {
-      if (!sq.man || sq.man.color === chess.game.enemy) {
+    this.turn.manEl.classList.add('active');
+    this.turn.squares = results.filter(function(sq) {
+      if (!sq.man || sq.man.color === chess.game.turn.enemy) {
         sq.el.classList.add('active');
         return true;
       }
     });
-    this.active.sqObj.el.classList.remove('active');
+    this.turn.sqObj.el.classList.remove('active');
   },
   deactivate: function(manEl) {
-    if (this.active.manEl)
-      this.active.manEl.classList.remove('active');
+    if (this.turn.manEl)
+      this.turn.manEl.classList.remove('active');
 
-    u.each(this.active.squares, function(sq) {
+    u.each(this.turn.squares, function(sq) {
       sq.el.classList.remove('active');
     });
-    this.active.sqObj = {};
-    this.active.manEl = undefined;
-    this.active.squares = [];
-    this.active.castling = [];
+
+    this.resetTurn();
   },
   getObject: function(manEl) {
     var sqEl = manEl.parentElement,
@@ -148,7 +147,7 @@ Game.prototype = {
 
     if (sq.man.name === 'king' && !this.inCheck) {
       castling = chess.castling.get(sq);
-      this.active.castling = castling;
+      this.turn.castling = castling;
       results = castling.concat(results);
     }
 
