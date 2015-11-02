@@ -79,9 +79,11 @@ window.chess.check = {
     if (escapes.length) return escapes;
   },
   getCaptureOfThreat: function(threats) {
-    var captures = [];
+    var captures = [],
+      color = threats[0].man.color;
+    console.log(color);
     u.each(threats, function(threat) {
-      var capture = chess.check.seekThreats(threat, chess.game.turn.enemy);
+      var capture = chess.check.seekThreats(threat, color);
       if (capture) captures = captures.concat(capture);
     });
     if (captures.length) return captures;
