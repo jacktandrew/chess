@@ -10,10 +10,14 @@ Game.prototype = {
   counter: 0,
   teams: ['white', 'black'],
   init: function() {
-    this.switchTurn();
+    this.resetTurn();
     document.body.addEventListener('click', this, false);
   },
   switchTurn: function() {
+    this.counter = 1 - this.counter;
+    this.resetTurn();
+  },
+  resetTurn: function() {
     this.turn = {
       enemy: this.teams[1 - this.counter],
       color: this.teams[this.counter],
@@ -41,6 +45,8 @@ Game.prototype = {
   parseEvent: function(sqEl, manEl) {
     var sqObj = this.getObject(manEl),
       isActive = this.turn.sqObj === sqObj;
+
+    console.log('')
 
     if (sqObj.man.color === this.turn.enemy) {
       this.checkCapture(manEl, sqObj);
@@ -77,7 +83,6 @@ Game.prototype = {
     chess.promotion.inquire(sqObj);
     sqObj.man.canCastle = false;
     chess.notation.record(sqObj);
-    this.counter = 1 - this.counter;
     this.deactivate();
     this.switchTurn();
   },
@@ -123,8 +128,7 @@ Game.prototype = {
       sq.el.classList.remove('active');
     });
 
-    this.turn.squares = [];
-    this.turn.castling = [];
+    this.resetTurn();
   },
   getObject: function(manEl) {
     var sqEl = manEl.parentElement,
