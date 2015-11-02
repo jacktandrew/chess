@@ -1,27 +1,24 @@
 window.chess.notation = {
   notes: [],
-  current: {},
-  previous: {},
+  current: undefined,
+  previous: undefined,
   logEl: document.querySelector('.log'),
   start: function(sqObj) {
     var sq = sqObj.name,
-      man = sqObj.man.abbr || '',
+      abbr = sqObj.man.abbr || '',
       fileName = chess.game.active.sqObj.name[0],
-      f1 = chess.game.active.sqObj.coords[0],
-      f2 = sqObj.coords[0],
-      note = man + sq;
+      note;
 
     this.color = sqObj.man.color;
 
-    if (chess.game.isCastling) {
-      if (f1 === 0 || f2 === 0) note = '0-0-0';
-      if (f1 === 7 || f2 === 7) note = '0-0';
-    } else if (chess.game.isCapture) {
-      note = man + 'x' + sq;
-      if (!man) note = fileName + 'x' + sq;
+    if (chess.game.isCapture) {
+      note = abbr + 'x' + sqObj.name;
+      if (!abbr) note = fileName + 'x' + sqObj.name;
+    } else {
+      note = abbr + sqObj.name;
     }
 
-    this.current = note;
+    if (!this.current) this.current = note;
   },
   finish: function(inCheck) {
     if (inCheck) this.current += '+';
@@ -32,6 +29,7 @@ window.chess.notation = {
     }
 
     this.previous = this.current;
+    this.current = undefined;
   },
   write: function(move) {
     var li = document.createElement('li');

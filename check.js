@@ -11,11 +11,11 @@ window.chess.check = {
   get: function(kingSq) {
     kingSq = kingSq || this.getSqByMan('king', chess.game.active.color);
     var threats = this.inquire(kingSq),
-      hasEscape;
+      hasUncheck;
 
     if (threats) {
-      hasEscape = this.findAnEscape(kingSq, threats);
-      if (!hasEscape) return this.alertMate();
+      hasUncheck = this.findUncheck(kingSq, threats);
+      if (!hasUncheck) return this.alertMate();
     }
 
     return threats;
@@ -78,16 +78,22 @@ window.chess.check = {
     if (captures.length) return captures;
   },
   getBlockOfThreat: function(kingSq, threats) {
-    var paths = [], blockers = [];
+    var active = chess.game.active.color,
+      paths = [], blockers = [];
+
     u.each(threats, function(threat) {
+      if (threat.man.name === 'knight') {
+        console.log('the knight cannot be blocked!');
+        return false;
+      }
       var path = chess.check.getAttackPaths(kingSq, threat);
       if (path.length) paths.push(path);
     });
 
     u.each(paths, function(path) {
       u.each(path, function(sq) {
-        var active = chess.game.active.color,
-          blocker = chess.check.seekThreats(sq, active, 'advances');
+        console.log('pathSq', sq);
+        var blocker = chess.check.seekThreats(sq, active, 'advances');
         blockers = blockers.concat(blocker)
       });
     });
@@ -117,7 +123,7 @@ window.chess.check = {
     }
     return path;
   },
-  findAnEscape: function(kingSq, threats) {
+  findUncheck: function(kingSq, threats) {
     var escapes = this.getEscapes(kingSq),
       captures = this.getCaptureOfThreat(threats),
       blocks = this.getBlockOfThreat(kingSq, threats);

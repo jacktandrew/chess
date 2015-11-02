@@ -37,8 +37,13 @@ window.chess.castling = {
       dstSq = chess.board.getSq(dstCoords),
       srcSq;
 
-    if (file < middleOfBoard) srcSq = queenSideSq;
-    if (file > middleOfBoard) srcSq = kingSideSq;
+    if (file < middleOfBoard) {
+      srcSq = queenSideSq;
+      chess.notation.current = '0-0-0';
+    } else if (file > middleOfBoard) {
+      srcSq = kingSideSq;
+      chess.notation.current = '0-0';
+    }
 
     chess.game.movePiece(srcSq, dstSq);
   }
