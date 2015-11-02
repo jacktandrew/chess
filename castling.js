@@ -18,7 +18,8 @@ window.chess.castling = {
     var validSquares = squares.filter(function(sq, i) {
       var inCheck = chess.check.seekThreats(sq, chess.castling.color),
         occupiedByEnemy = (sq.man && sq.man.color !== chess.castling.color);
-      if (!inCheck && (!sq.man || occupiedByEnemy)) return true;
+      if (inCheck) return false;
+      if (!sq.man || occupiedByEnemy) return true;
       if (sq.man && sq.man.canCastle) return true;
     });
 

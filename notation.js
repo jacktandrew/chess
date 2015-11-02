@@ -21,7 +21,7 @@ window.chess.notation = {
     var abbr = sqObj.man.abbr || '',
       fileName = chess.game.turn.sqObj.name[0];
 
-    if (chess.game.turn.isCapture) {
+    if (chess.game.turn.captured) {
       note = abbr + 'x' + sqObj.name;
       if (!abbr) note = fileName + 'x' + sqObj.name;
     } else {

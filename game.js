@@ -10,7 +10,6 @@ Game.prototype = {
   counter: 0,
   teams: ['white', 'black'],
   init: function() {
-    // this.captures = [];
     this.switchTurn();
     document.body.addEventListener('click', this, false);
   },
@@ -44,7 +43,7 @@ Game.prototype = {
       isActive = this.turn.sqObj === sqObj;
 
     if (sqObj.man.color === this.turn.enemy) {
-      this.capture(sqEl, manEl, sqObj);
+      this.checkCapture(manEl, sqObj);
       this.handleSquare(sqEl);
     } else if (sqObj.man.color === this.turn.color) {
       if (this.turn.manEl) this.deactivate();
@@ -81,19 +80,19 @@ Game.prototype = {
     this.counter = 1 - this.counter;
     this.deactivate();
     this.switchTurn();
-    // chess.pawn.enPassant = {};
   },
-  capture: function(sqEl, manEl, sqObj) {
+  checkCapture: function(manEl, sqObj) {
     var isActiveSq = this.turn.squares.indexOf(sqObj) + 1;
-    if (isActiveSq) {
-      this.turn.man = sqObj.man;
-      this.turn.captured = {
-        el: manEl,
-        man: sqObj.man
-      };
-      sqObj.el.removeChild(manEl);
-      sqObj.man = undefined;
-    }
+    if (isActiveSq) this.capture(manEl, sqObj)
+  },
+  capture: function(manEl, sqObj) {
+    this.turn.man = sqObj.man;
+    this.turn.captured = {
+      el: manEl,
+      man: sqObj.man
+    };
+    sqObj.el.removeChild(manEl);
+    sqObj.man = undefined;
   },
   handleMan: function(manEl) {
     var sqObj = this.getObject(manEl),

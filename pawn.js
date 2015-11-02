@@ -60,7 +60,6 @@ window.chess.pawn = {
   completePass: function() {
     var sqObj = this.enPassant.manSq,
       manEl = sqObj.el.children[0];
-
-    chess.game.finishCapture(manEl, sqObj);
+    chess.game.capture(manEl, sqObj);
   }
 };
