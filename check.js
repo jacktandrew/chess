@@ -48,17 +48,23 @@ window.chess.check = {
       });
     if (real.length) return real;
   },
-  reverseMove: function(sqObj) {
+  reverseMove: function(srcObj, dstObj) {
+    var kingObj = this.getSqByMan('king', chess.game.active.color),
+      kingEl = kingObj.el.children[0];
+    kingEl.classList.add('active');
+    chess.game.deactivate();
     setTimeout(function() {
-      chess.game.active.sqObj.man = chess.game.active.man;
-      chess.game.active.sqObj.el.appendChild(chess.game.active.manEl);
-      sqObj.man = undefined;
+      srcObj.el.appendChild(dstObj.el.children[0]);
+      srcObj.man = dstObj.man;
+      dstObj.man = undefined;
       if (chess.game.isCapture) {
-        sqObj.man = chess.game.capturedMan;
-        sqObj.el.appendChild(chess.game.capturedEl);
+        dstObj.man = chess.game.capturedMan;
+        dstObj.el.appendChild(chess.game.capturedEl);
         chess.game.isCapture = false;
       }
-    }, 500);
+      chess.game.deactivate();
+      kingEl.classList.remove('active');
+    }, 400);
   },
   getEscapes: function(kingSq) {
     var kingMoves = chess.game.seekOne(kingSq.coords, kingSq.man.moves),

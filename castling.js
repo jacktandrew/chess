@@ -21,10 +21,7 @@ window.chess.castling = {
       if (sq.man && sq.man.canCastle) return true;
     });
 
-    if (squares.length === validSquares.length) {
-      squares[2].castling = true;
-      return squares[2];
-    }
+    if (squares.length === validSquares.length) return squares[2];
   },
   moveRook: function(sqObj) {
     var middleOfBoard = 4,

@@ -11,7 +11,11 @@ Game.prototype = {
   teams: ['white', 'black'],
   init: function() {
     this.captures = [];
-    this.active = { color: this.teams[this.counter], squares: [] };
+    this.active = {
+      color: this.teams[this.counter],
+      squares: [],
+      castling: []
+    };
     this.enemy = this.teams[1 - this.counter];
     document.body.addEventListener('click', this, false);
   },
@@ -45,19 +49,17 @@ Game.prototype = {
     var sqObj = chess.board[sqEl.dataset.name],
       validMove = this.active.squares.indexOf(sqObj) + 1,
       enPassant = chess.pawn.enPassant.moveSq === sqObj,
-      castling = sqObj.castling === true;
+      castling = this.active.castling.indexOf(sqObj) + 1;
 
     if (!validMove) return false;
     this.movePiece(this.active.sqObj, sqObj);
     this.inCheck = chess.check.get();
     if (castling) chess.castling.moveRook(sqObj);
     if (enPassant) chess.pawn.completePass();
-    if (this.inCheck) chess.check.reverseMove(sqObj);
+    if (this.inCheck) chess.check.reverseMove(this.active.sqObj, sqObj);
     else this.endTurn(sqObj);
   },
   movePiece: function(srcObj, dstObj) {
-    srcObj.man.canCastle = false;
-
     //  Put man on target square in HTML
     dstObj.el.appendChild(srcObj.el.children[0]);
 
@@ -66,6 +68,8 @@ Game.prototype = {
     srcObj.man = undefined;
   },
   endTurn: function(sqObj) {
+    chess.promotion.inquire(sqObj);
+    sqObj.man.canCastle = false;
     chess.notation.start(sqObj);
     this.counter = 1 - this.counter;
     this.deactivate();
@@ -73,6 +77,7 @@ Game.prototype = {
     this.enemy = this.teams[1 - this.counter];
     this.inCheck = chess.check.get();
     this.active.squares = [];
+    this.active.castling = [];
     chess.notation.finish(this.inCheck);
     this.isCapture = false;
     chess.pawn.enPassant = {};
@@ -115,13 +120,16 @@ Game.prototype = {
     this.active.sqObj.el.classList.remove('active');
   },
   deactivate: function(manEl) {
-    this.active.manEl.classList.remove('active');
+    if (this.active.manEl)
+      this.active.manEl.classList.remove('active');
+
     u.each(this.active.squares, function(sq) {
       sq.el.classList.remove('active');
     });
     this.active.sqObj = {};
     this.active.manEl = undefined;
     this.active.squares = [];
+    this.active.castling = [];
   },
   getObject: function(manEl) {
     var sqEl = manEl.parentElement,
@@ -140,6 +148,7 @@ Game.prototype = {
 
     if (sq.man.name === 'king' && !this.inCheck) {
       castling = chess.castling.get(sq);
+      this.active.castling = castling;
       results = castling.concat(results);
     }
 

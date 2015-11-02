@@ -11,6 +11,10 @@
   float: left;
 }
 
+.board.promotion {
+  opacity: 0.1;
+}
+
 .square {
   width: 5rem;
   height: 5rem;

@@ -56,7 +56,25 @@
         width = parseInt(style.width),
         boardWidth = width * length + 100;
       boardEl.style.width = boardWidth + 'px';
+      this.boardEl = boardEl;
     },
+    makePromotionModal: function(color) {
+      var modal = document.createElement('aside'),
+        options = u.filter(this.pieces[color], function(unicode, name) {
+          if (name === 'pawn' || name === 'king') return false;
+          else return true;
+        });
+        u.each(options, function(unicode, name) {
+          var piece = document.createElement('figure');
+          piece.innerHTML = unicode;
+          piece.classList.add('man', name);
+          modal.appendChild(piece);
+        });
+
+      this.boardEl.classList.add('promotion');
+      modal.classList.add('modal', color);
+      document.body.appendChild(modal);
+    }
   };
 
 })();
