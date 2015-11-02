@@ -24,7 +24,7 @@ window.chess.promotion = {
     });
 
     document.body.appendChild(modal);
-    document.body.classList.add('promotion');
+    document.body.classList.add('modal');
     this.modal = modal;
   },
   finish: function(manEl) {
@@ -32,7 +32,7 @@ window.chess.promotion = {
       man = this.men[manEl.dataset.name];
 
     manEl.classList.remove('promotion');
-    document.body.classList.remove('promotion');
+    document.body.classList.remove('modal');
     document.body.removeChild(this.modal);
 
     this.sqObj.man = man;

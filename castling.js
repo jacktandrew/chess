@@ -3,6 +3,7 @@ window.chess.castling = {
     var rank = sqObj.coords[1] + 1,
       qSide = [], kSide = [], castlingSq = [];
 
+    this.color = sqObj.man.color;
     u.loopRank(chess.board, rank, function(sq) {kSide.push(sq)});
     qSide = kSide.splice(0,4)
 
@@ -15,8 +16,8 @@ window.chess.castling = {
   },
   check: function(squares) {
     var validSquares = squares.filter(function(sq, i) {
-      var inCheck = chess.check.inquire(sq),
-        occupiedByEnemy = (sq.man && sq.man.color === chess.game.turn.enemy);
+      var inCheck = chess.check.seekThreats(sq, chess.castling.color),
+        occupiedByEnemy = (sq.man && sq.man.color !== chess.castling.color);
       if (!inCheck && (!sq.man || occupiedByEnemy)) return true;
       if (sq.man && sq.man.canCastle) return true;
     });

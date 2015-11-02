@@ -8,9 +8,9 @@ window.chess.check = {
     });
     return results[0]
   },
-  get: function(kingSq) {
-    kingSq = kingSq || this.getSqByMan('king', chess.game.turn.color);
-    var threats = this.inquire(kingSq),
+  get: function(color) {
+    var kingSq = this.getSqByMan('king', color),
+      threats = this.seekThreats(kingSq, color),
       hasUncheck;
 
     if (threats) {
@@ -21,12 +21,13 @@ window.chess.check = {
     return threats;
   },
   alertMate: function() {
-    alert(chess.game.turn.color+'... You lost... '+' Congrats '+chess.game.turn.enemy);
+    var modal = chess.render.getModal(chess.game.turn.color);
+    modal.classList.add('mate');
+    modal.innerHTML = chess.game.turn.color.toUpperCase() + ' WINS';
+    document.body.classList.add('modal');
+    document.body.appendChild(modal);
   },
-  inquire: function(kingSq) {
-    return this.seekThreats(kingSq, chess.game.turn.enemy);
-  },
-  seekThreats: function(target, enemy, moveType) {
+  seekThreats: function(target, ownTeam, moveType) {
     moveType = moveType || 'captures';
     var proto = chess.Pieces.prototype,
       l_shaped = chess.game.seekOne(target.coords, proto.l_shaped),
@@ -34,7 +35,7 @@ window.chess.check = {
       straight = chess.game.seekMany(target.coords, proto.straight),
       squares = l_shaped.concat(diagonal, straight),
       threats = squares.filter(function(sq) {
-        if (sq.man && sq.man.color === enemy) return true;
+        if (sq.man && sq.man.color !== ownTeam) return true;
       }),
       real = threats.filter(function(sq) {
         var deltas = sq.man.moves[moveType] || sq.man.moves;
@@ -49,18 +50,20 @@ window.chess.check = {
     if (real.length) return real;
   },
   reverseMove: function(srcObj, dstObj) {
-    var kingObj = this.getSqByMan('king', chess.game.turn.color),
+    var kingObj = this.getSqByMan('king', dstObj.man.color),
       kingEl = kingObj.el.children[0];
+
     kingEl.classList.add('active');
     chess.game.deactivate();
+
     setTimeout(function() {
       srcObj.el.appendChild(dstObj.el.children[0]);
       srcObj.man = dstObj.man;
       dstObj.man = undefined;
-      if (chess.game.turn.isCapture) {
-        dstObj.man = chess.game.capturedMan;
-        dstObj.el.appendChild(chess.game.capturedEl);
-        chess.game.turn.isCapture = false;
+      if (chess.game.turn.captured) {
+        dstObj.man = chess.game.turn.captured.man;
+        dstObj.el.appendChild(chess.game.turn.captured.el);
+        chess.game.turn.captured = undefined;
       }
       chess.game.deactivate();
       kingEl.classList.remove('active');
@@ -69,7 +72,7 @@ window.chess.check = {
   getEscapes: function(kingSq) {
     var kingMoves = chess.game.seekOne(kingSq.coords, kingSq.man.moves),
       escapes = kingMoves.filter(function(sq) {
-        var inCheck = chess.check.inquire(sq);
+        var inCheck = chess.check.seekThreats(sq, kingSq.man.color);
         if (inCheck) return false;
         if (!sq.man) return true;
       });
@@ -78,13 +81,13 @@ window.chess.check = {
   getCaptureOfThreat: function(threats) {
     var captures = [];
     u.each(threats, function(threat) {
-      var capture = chess.check.seekThreats(threat, chess.game.turn.color);
+      var capture = chess.check.seekThreats(threat, chess.game.turn.enemy);
       if (capture) captures = captures.concat(capture);
     });
     if (captures.length) return captures;
   },
   getBlockOfThreat: function(kingSq, threats) {
-    var active = chess.game.turn.color,
+    var enemy = threats[0].man.color,
       paths = [], blockers = [];
 
     u.each(threats, function(threat) {
@@ -98,8 +101,7 @@ window.chess.check = {
 
     u.each(paths, function(path) {
       u.each(path, function(sq) {
-        console.log('pathSq', sq);
-        var blocker = chess.check.seekThreats(sq, active, 'advances');
+        var blocker = chess.check.seekThreats(sq, enemy, 'advances');
         blockers = blockers.concat(blocker)
       });
     });

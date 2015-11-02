@@ -28,27 +28,27 @@ html, body { height: 100%; }
 .square.active { border: 5px inset darkorange; }
 .square.threatened { border: 5px inset yellow; }
 
-.man {
-  font-size: 5em;
-  line-height: 1em;
-  vertical-align: middle;
-  text-align: center;
-}
-
 .man.active { color: darkorange; }
 
-.modal { display: none; }
-.modal .man { margin: 0.5rem; }
+aside .man { margin: 0.5rem; }
 
-.promotion .board {
+.modal .board {
   opacity: 0.1;
   pointer-events: none;
 }
 
-.promotion .modal {
+aside {
+  font-size: 4rem;
   display: -webkit-box;
   position: absolute;
   left: 13rem; top: 22rem;
+}
+
+.man {
+  font-size: 5rem;
+  line-height: 1em;
+  vertical-align: middle;
+  text-align: center;
 }
 
 

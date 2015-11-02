@@ -20,7 +20,6 @@ window.chess.pawn = {
       captures = possible.filter(function(sq) {
         if (sq && sq.man && sq.man.color === enemy) return true;
       });
-    chess.game.captures = chess.game.captures.concat(captures);
     return captures;
   },
   getAdvances: function(sq) {

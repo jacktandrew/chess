@@ -10,11 +10,11 @@ Game.prototype = {
   counter: 0,
   teams: ['white', 'black'],
   init: function() {
-    this.captures = [];
-    this.resetTurn();
+    // this.captures = [];
+    this.switchTurn();
     document.body.addEventListener('click', this, false);
   },
-  resetTurn: function() {
+  switchTurn: function() {
     this.turn = {
       enemy: this.teams[1 - this.counter],
       color: this.teams[this.counter],
@@ -36,16 +36,17 @@ Game.prototype = {
 
     if (manEl)
       this.parseEvent(sqEl, manEl);
-    else if (u.hasClass(sqEl, 'active'))
+    else if (sqEl && u.hasClass(sqEl, 'active'))
       this.handleSquare(sqEl);
   },
   parseEvent: function(sqEl, manEl) {
     var sqObj = this.getObject(manEl),
       isActive = this.turn.sqObj === sqObj;
 
-    if (sqObj.man.color === this.turn.enemy)
+    if (sqObj.man.color === this.turn.enemy) {
       this.capture(sqEl, manEl, sqObj);
-    else if (sqObj.man.color === this.turn.color) {
+      this.handleSquare(sqEl);
+    } else if (sqObj.man.color === this.turn.color) {
       if (this.turn.manEl) this.deactivate();
       if (!isActive) this.handleMan(manEl);
     }
@@ -54,14 +55,15 @@ Game.prototype = {
     var sqObj = chess.board[sqEl.dataset.name],
       validMove = this.turn.squares.indexOf(sqObj) + 1,
       enPassant = chess.pawn.enPassant.moveSq === sqObj,
-      castling = this.turn.castling.indexOf(sqObj) + 1;
+      castling = this.turn.castling.indexOf(sqObj) + 1,
+      inCheck;
 
     if (!validMove) return false;
     this.movePiece(this.turn.sqObj, sqObj);
-    this.inCheck = chess.check.get();
+    inCheck = chess.check.get(this.turn.color);
     if (castling) chess.castling.moveRook(sqObj);
     if (enPassant) chess.pawn.completePass();
-    if (this.inCheck) chess.check.reverseMove(this.turn.sqObj, sqObj);
+    if (inCheck) chess.check.reverseMove(this.turn.sqObj, sqObj);
     else this.endTurn(sqObj);
   },
   movePiece: function(srcObj, dstObj) {
@@ -75,29 +77,23 @@ Game.prototype = {
   endTurn: function(sqObj) {
     chess.promotion.inquire(sqObj);
     sqObj.man.canCastle = false;
-
-    this.inCheck = chess.check.get();
+    chess.notation.record(sqObj);
     this.counter = 1 - this.counter;
-    chess.notation.record(sqObj, this.inCheck);
-
     this.deactivate();
-    chess.pawn.enPassant = {};
+    this.switchTurn();
+    // chess.pawn.enPassant = {};
   },
   capture: function(sqEl, manEl, sqObj) {
     var isActiveSq = this.turn.squares.indexOf(sqObj) + 1;
-
     if (isActiveSq) {
-      this.finishCapture(manEl, sqObj);
-      this.handleSquare(sqEl);
+      this.turn.man = sqObj.man;
+      this.turn.captured = {
+        el: manEl,
+        man: sqObj.man
+      };
+      sqObj.el.removeChild(manEl);
+      sqObj.man = undefined;
     }
-  },
-  finishCapture: function(manEl, sqObj) {
-    this.turn.man = sqObj.man;
-    this.capturedEl = manEl;
-    this.capturedMan = sqObj.man;
-    sqObj.el.removeChild(manEl);
-    sqObj.man = undefined;
-    this.turn.isCapture = true;
   },
   handleMan: function(manEl) {
     var sqObj = this.getObject(manEl),
@@ -128,7 +124,8 @@ Game.prototype = {
       sq.el.classList.remove('active');
     });
 
-    this.resetTurn();
+    this.turn.squares = [];
+    this.turn.castling = [];
   },
   getObject: function(manEl) {
     var sqEl = manEl.parentElement,

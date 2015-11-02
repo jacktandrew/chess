@@ -3,7 +3,8 @@ window.chess.notation = {
   current: undefined,
   previous: undefined,
   logEl: document.querySelector('.log'),
-  record: function(sqObj, inCheck) {
+  record: function(sqObj) {
+    var inCheck = chess.check.get(chess.game.turn.enemy);
     if (!this.current) this.current = this.getNote(sqObj);
 
     if (inCheck) this.current += '+';
