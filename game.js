@@ -15,6 +15,7 @@ Game.prototype = {
   },
   switchTurn: function() {
     this.counter = 1 - this.counter;
+    this.captured = undefined;
     this.resetTurn();
   },
   resetTurn: function() {
@@ -45,8 +46,6 @@ Game.prototype = {
   parseEvent: function(sqEl, manEl) {
     var sqObj = this.getObject(manEl),
       isActive = this.turn.sqObj === sqObj;
-
-    console.log('')
 
     if (sqObj.man.color === this.turn.enemy) {
       this.checkCapture(manEl, sqObj);
@@ -92,7 +91,7 @@ Game.prototype = {
   },
   capture: function(manEl, sqObj) {
     this.turn.man = sqObj.man;
-    this.turn.captured = {
+    this.captured = {
       el: manEl,
       man: sqObj.man
     };

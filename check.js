@@ -60,10 +60,10 @@ window.chess.check = {
       srcObj.el.appendChild(dstObj.el.children[0]);
       srcObj.man = dstObj.man;
       dstObj.man = undefined;
-      if (chess.game.turn.captured) {
-        dstObj.man = chess.game.turn.captured.man;
-        dstObj.el.appendChild(chess.game.turn.captured.el);
-        chess.game.turn.captured = undefined;
+      if (chess.game.captured) {
+        dstObj.man = chess.game.captured.man;
+        dstObj.el.appendChild(chess.game.captured.el);
+        chess.game.captured = undefined;
       }
       chess.game.deactivate();
       kingEl.classList.remove('active');
@@ -81,7 +81,7 @@ window.chess.check = {
   getCaptureOfThreat: function(threats) {
     var captures = [],
       color = threats[0].man.color;
-    console.log(color);
+
     u.each(threats, function(threat) {
       var capture = chess.check.seekThreats(threat, color);
       if (capture) captures = captures.concat(capture);
