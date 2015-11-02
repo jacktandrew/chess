@@ -17,6 +17,7 @@
 <script src="pawn.js"></script>
 <script src="check.js"></script>
 <script src="notation.js"></script>
+<script src="ai.js"></script>
 <script src="promotion.js"></script>
 <script src="castling.js"></script>
 <script src="render.js"></script>
@@ -29,6 +30,7 @@
   var black = chess.team.black = new chess.Pieces('black');
   chess.setup.init(board, boardEl, white, black);
   chess.game = new chess.Game(board);
+  chess.ai.play();
 </script>
 </body>
 </html>

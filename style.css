@@ -6,10 +6,12 @@
   -webkit-user-select: none;
 }
 
-html, body { height: 100%; }
+html { font-size: 15px; }
 
 
-.board, .log { margin: 2.5rem; }
+.board, .log { margin: 2rem 2rem 0; }
+
+.log { display: none; }
 
 .square {
   width: 5rem;
