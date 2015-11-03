@@ -1,7 +1,13 @@
 window.u = window.utils = {
   combine: function(arr1, arr2) {
     u.each(arr1, function(val1, i) {
-      arr2[i] = arr2[i] + val1;
+      arr2[i] += val1;
+    });
+    return arr2;
+  },
+  compare: function(arr1, arr2) {
+    u.each(arr1, function(val1, i) {
+      arr2[i] -= val1;
     });
     return arr2;
   },

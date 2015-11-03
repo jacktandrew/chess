@@ -70,23 +70,41 @@ window.chess.check = {
     }, 400);
   },
   getEscapes: function(kingSq) {
-    var kingMoves = chess.game.seekOne(kingSq.coords, kingSq.man.moves),
+    var king = kingSq.man,
+      kingMoves = chess.game.seekOne(kingSq.coords, king.moves),
       escapes = kingMoves.filter(function(sq) {
-        var inCheck = chess.check.seekThreats(sq, kingSq.man.color);
+        kingSq.man = undefined;
+        var inCheck = chess.check.seekThreats(sq, king.color);
         if (inCheck) return false;
         if (!sq.man) return true;
       });
+    kingSq.man = king;
     if (escapes.length) return escapes;
   },
   getCaptureOfThreat: function(threats) {
-    var captures = [],
+    var allCaptures = [],
       color = threats[0].man.color;
 
     u.each(threats, function(threat) {
-      var capture = chess.check.seekThreats(threat, color);
-      if (capture) captures = captures.concat(capture);
+      var captures = chess.check.seekThreats(threat, color) || [];
+
+      captures = captures.filter(function(sq) {
+        return chess.check.filterMoves(sq, threat);
+      });
+
+      if (captures.length) allCaptures = allCaptures.concat(captures);
     });
-    if (captures.length) return captures;
+
+    if (allCaptures.length) return allCaptures;
+  },
+  filterMoves: function(sq, threat) {
+    var invalid = [];
+
+    if (sq.man.name === 'king')
+      invalid = chess.check.seekThreats(threat, sq.man.color) || [];
+
+    if (invalid.length === 0)
+      return true;
   },
   getBlockOfThreat: function(kingSq, threats) {
     var enemy = threats[0].man.color,
