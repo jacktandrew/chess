@@ -8,10 +8,10 @@
 
 html { font-size: 15px; }
 
-
-.board, .log { margin: 2rem 2rem 0; }
-
-.log { display: none; }
+.board, .log {
+  margin: 2rem 2rem 0;
+  float: left;
+}
 
 .square {
   width: 5rem;
@@ -22,6 +22,17 @@ html { font-size: 15px; }
   background-color: lemonchiffon;
 }
 
+.square .man { position: absolute; }
+
+.man i {
+  pointer-events: none;
+  position: absolute;
+  font-style: normal;
+}
+
+.man.white .mask { color: black; }
+.man.black .mask { display: none; }
+
 .square.black {
   background-color: green;
   border-color: green;
@@ -30,9 +41,14 @@ html { font-size: 15px; }
 .square.active { border: 5px inset darkorange; }
 .square.threatened { border: 5px inset yellow; }
 
+.man.white { color: #EEE; }
 .man.active { color: darkorange; }
 
-aside .man { margin: 0.5rem; }
+aside .man {
+  margin: 0.5rem;
+  width: 5rem;
+  height: 5rem;
+}
 
 .modal .board {
   opacity: 0.1;
@@ -49,8 +65,8 @@ aside {
 .man {
   font-size: 5rem;
   line-height: 1em;
-  vertical-align: middle;
-  text-align: center;
+/*  vertical-align: middle;
+  text-align: center;*/
 }
 
 

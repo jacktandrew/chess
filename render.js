@@ -3,13 +3,21 @@
 
   chess.render = {
     pieces: {
-      white: {
+      transparent: {
         king: '&#9812;',
         queen: '&#9813;',
         rook: '&#9814;',
         bishop: '&#9815;',
         knight: '&#9816;',
         pawn: '&#9817;'
+      },
+      white: {
+        king: '&#9818;',
+        queen: '&#9819;',
+        rook: '&#9820;',
+        bishop: '&#9821;',
+        knight: '&#9822;',
+        pawn: '&#9823;'
       },
       black: {
         king: '&#9818;',
@@ -43,8 +51,10 @@
     },
     getManEl: function(man) {
       var manEl = document.createElement('figure'),
-        character = this.pieces[man.color][man.name];
-      manEl.innerHTML = character;
+        character = this.pieces[man.color][man.name],
+        mask = this.pieces.transparent[man.name];
+
+      manEl.innerHTML = '<i>'+character+'</i><i class="mask">'+mask+'</i>';
       manEl.dataset.name = man.name;
       manEl.classList.add('man', man.color, man.name);
       return manEl;
