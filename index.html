@@ -3,25 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <title>Chess</title>
-  <link rel="stylesheet" type="text/css" href="style.css">
-  <link rel="stylesheet" type="text/css" href="label.css">
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <link rel="stylesheet" type="text/css" href="css/label.css">
 </head>
 <body>
 
 <section class="board"></section>
 <ol class="log"></ol>
-<script src="utils.js"></script>
-<script src="board.js"></script>
-<script src="pieces.js"></script>
-<script src="game.js"></script>
-<script src="pawn.js"></script>
-<script src="check.js"></script>
-<script src="notation.js"></script>
-<script src="ai.js"></script>
-<script src="promotion.js"></script>
-<script src="castling.js"></script>
-<script src="render.js"></script>
-<script src="setup.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/board.js"></script>
+<script src="js/pieces.js"></script>
+<script src="js/game.js"></script>
+<script src="js/pawn.js"></script>
+<script src="js/check.js"></script>
+<script src="js/notation.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/promotion.js"></script>
+<script src="js/castling.js"></script>
+<script src="js/render.js"></script>
+<script src="js/setup.js"></script>
 <script>
   var boardEl = document.querySelector('.board');
   var board = chess.board = new chess.Board();
@@ -35,7 +35,7 @@
 
   longNotation = [];
 
-  u.ajax('immortal.json', function(string) {
+  u.ajax('json/immortal.json', function(string) {
     game = JSON.parse(string);
     u.each(game, function(move) {
       white = makeLong(move[0]);
