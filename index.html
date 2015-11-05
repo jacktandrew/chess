@@ -22,14 +22,6 @@
 <script src="js/castling.js"></script>
 <script src="js/render.js"></script>
 <script src="js/setup.js"></script>
-<script>
-  var boardEl = document.querySelector('.board');
-  var board = chess.board = new chess.Board();
-  chess.team = {};
-  var white = chess.team.white = new chess.Pieces('white');
-  var black = chess.team.black = new chess.Pieces('black');
-  chess.setup.init(board, boardEl, white, black);
-  chess.game = new chess.Game(board);
-</script>
+<script src="js/init.js"></script>
 </body>
 </html>
