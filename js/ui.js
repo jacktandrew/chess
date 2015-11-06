@@ -30,7 +30,10 @@ chess.ui =  {
   handleSquare: function(sqEl) {
   	var sqObj = chess.board[sqEl.dataset.name],
   		validMove = this.turn.squares.indexOf(sqObj) + 1,
+  		unusual = this.checkForTheUnusual(sqObj),
 	  	possibleMoves, start;
+
+	  if (unusual) return;
 
 		if (validMove) {
 			chess.game.movePiece(this.turn.start, sqObj);
@@ -42,24 +45,16 @@ chess.ui =  {
 			this.activate(sqObj, possibleMoves);
 		}
   },
-  old: function(sqEl) {
-    // var sqObj = chess.board[sqEl.dataset.name],
-    //   possibleMoves = chess.game.getMoves(sqObj),
-    //   validMove = this.turn.squares.indexOf(sqObj) + 1,
-    //   enPassant = chess.pawn.enPassant.moveSq === sqObj,
-    //   castling = this.turn.castling.indexOf(sqObj) + 1,
-    //   inCheck;
+  checkForTheUnusual: function(sqObj) {
+  	var enPassant = chess.pawn.enPassant.moveSq === sqObj,
+  		castling = this.turn.castling.indexOf(sqObj) + 1,
+	    inCheck = chess.check.get(this.turn.color);
 
-    // this.turn.push(sqObj);
-    // this.activate(results);
+    if (castling) chess.castling.moveRook(sqObj);
+    if (enPassant) chess.pawn.completePass();
+    if (inCheck) chess.check.reverseMove(this.turn.start, sqObj);
 
-    // if (!validMove) return false;
-    // chess.game.movePiece(this.turn.sqObj, sqObj);
-    // inCheck = chess.check.get(this.turn.color);
-    // if (castling) chess.castling.moveRook(sqObj);
-    // if (enPassant) chess.pawn.completePass();
-    // if (inCheck) chess.check.reverseMove(this.turn.sqObj, sqObj);
-    // else chess.game.endTurn(sqObj);
+    return enPassant || castling || inCheck;
   },
   activate: function(target, squares) {
   	var color = target.man.color;
@@ -73,18 +68,24 @@ chess.ui =  {
 
     target.el.children[0].classList.add('active');
   },
-  deactivate: function() {
+  deactivate: function(sqObj) {
     u.each(this.turn.squares, function(sq) {
       sq.el.classList.remove('active');
-      if (sq.el.children[0])
-	      sq.el.children[0].classList.remove('active');
     });
+
+    if (this.turn.start)
+	    this.turn.start.el.children[0].classList.remove('active');
+
+	  if (sqObj) sqObj.el.children[0].classList.remove('active');
+
+
 		this.turn.squares = [];
   },
   endTurn: function(sqObj) {
     chess.promotion.inquire(sqObj);
     chess.notation.record(sqObj);
-    this.deactivate();
+    this.turn.start = undefined;
+    this.deactivate(sqObj);
     this.counter = 1 - this.counter;
     this.resetTurn();
   }

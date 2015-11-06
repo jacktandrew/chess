@@ -49,8 +49,8 @@ window.chess.pawn = {
     return move;
   },
   completePass: function() {
-    var sqObj = this.enPassant.manSq,
-      manEl = sqObj.el.children[0];
-    chess.game.capture(manEl, sqObj);
+    chess.game.movePiece(chess.ui.turn.start, this.enPassant.moveSq);
+    chess.game.capture(this.enPassant.manSq);
+    chess.ui.endTurn(this.enPassant.moveSq);
   }
 };
