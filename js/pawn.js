@@ -50,5 +50,7 @@ window.chess.pawn = {
   },
   completePass: function() {
     chess.game.capture(this.enPassant.manSq);
+    this.enPassant = {};
+    console.log('ep', this.enPassant);
   }
 };
