@@ -29,22 +29,30 @@ Game.prototype = {
     sqObj.man = undefined;
   },
   getMoves: function(sq) {
-    var results, castling;
+    var results;
 
     if (sq.man.name === 'pawn')
       results = chess.pawn.getMoves(sq);
+    else if (sq.man.name === 'king')
+      results = this.getKingMoves(sq);
     else if (sq.man.repeat)
       results = chess.game.seekMany(sq.coords, sq.man.moves);
     else
       results = chess.game.seekOne(sq.coords, sq.man.moves);
 
-    if (sq.man.name === 'king' && !sq.man.hasMoved) {
+    return results;
+  },
+  getKingMoves: function(sq, results) {
+    var results = chess.game.seekOne(sq.coords, sq.man.moves),
+      castling;
+
+    if (!sq.man.hasMoved) {
       castling = chess.castling.get(sq);
       chess.ui.turn.castling = castling;
-      results = castling.concat(results);
+      results = results.concat(castling);
     }
 
-    return results;
+    return chess.check.filterKingMoves(sq.man, results);
   },
   seekOne: function(start, deltas) {
     var squares = deltas.map(function(delta) {

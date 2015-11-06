@@ -19,6 +19,13 @@ window.chess.check = {
 
     return threats;
   },
+  filterKingMoves: function(man, squares) {
+    var color = man.color;
+    return squares.filter(function(sq) {
+      var threatened = chess.check.seekThreats(sq, color);
+      if (!threatened) return true;
+    });
+  },
   alertMate: function() {
     var modal = chess.render.getModal(chess.ui.turn.color);
     modal.classList.add('mate');
