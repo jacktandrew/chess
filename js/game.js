@@ -38,7 +38,7 @@ Game.prototype = {
     else
       results = chess.game.seekOne(sq.coords, sq.man.moves);
 
-    if (sq.man.name === 'king' && !this.inCheck) {
+    if (sq.man.name === 'king' && !sq.man.hasMoved) {
       castling = chess.castling.get(sq);
       chess.ui.turn.castling = castling;
       results = castling.concat(results);

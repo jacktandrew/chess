@@ -60,7 +60,6 @@
         color: this.color,
         moves: this.straight,
         repeat: true,
-        canCastle: true,
         abbr: 'R'
       }
     },
@@ -98,7 +97,6 @@
         color: this.color,
         moves: this.all,
         repeat: false,
-        canCastle: true,
         abbr: 'K'
       }
     }

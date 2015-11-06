@@ -16,14 +16,15 @@ window.chess.castling = {
   },
   check: function(squares) {
     var validSquares = squares.filter(function(sq, i) {
-      var man = sq.man,
-        inCheck = chess.check.seekThreats(sq, chess.castling.color),
-        occupiedByEnemy = (man && man.color !== chess.castling.color);
+        var man = sq.man,
+          inCheck = chess.check.seekThreats(sq, chess.castling.color),
+          occupiedByEnemy = (man && man.color !== chess.castling.color);
 
-      if (inCheck) return false;
-      if (!man || occupiedByEnemy) return true;
-      if (man && !man.hasMoved && man.canCastle) return true;
-    });
+        if (inCheck) return false;
+        if (!man || occupiedByEnemy) return true;
+        if (man.name === 'rook' && !man.hasMoved) return true;
+        if (man.name === 'king' && !man.hasMoved) return true;
+      });
 
     if (squares.length === validSquares.length) return squares[2];
   },
