@@ -1,13 +1,5 @@
 window.chess.pawn = {
   enPassant: {},
-  home: {
-    white: 1,
-    black: 6
-  },
-  onHome: function(coords) {
-    var team = chess.game.turn.color;
-    if (this.home[team] === coords[1]) return true;
-  },
   getMoves: function(sq) {
     var captures = this.getCaptures(sq),
       advances = this.getAdvances(sq),
@@ -23,13 +15,12 @@ window.chess.pawn = {
     return captures;
   },
   getAdvances: function(sq) {
-    var onHome = this.onHome(sq.coords),
-      possible = chess.game.seekOne(sq.coords, sq.man.moves.advances);
+    var possible = chess.game.seekOne(sq.coords, sq.man.moves.advances);
 
     return possible.filter(function(move, i) {
       if (!move) return false;
       if (!move.man && i === 0) return true;
-      if (!move.man && onHome) return true;
+      if (!move.man && !sq.man.hasMoved) return true;
     });
   },
   getEnPassant: function(sq) {

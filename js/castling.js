@@ -16,11 +16,13 @@ window.chess.castling = {
   },
   check: function(squares) {
     var validSquares = squares.filter(function(sq, i) {
-      var inCheck = chess.check.seekThreats(sq, chess.castling.color),
-        occupiedByEnemy = (sq.man && sq.man.color !== chess.castling.color);
+      var man = sq.man,
+        inCheck = chess.check.seekThreats(sq, chess.castling.color),
+        occupiedByEnemy = (man && man.color !== chess.castling.color);
+
       if (inCheck) return false;
-      if (!sq.man || occupiedByEnemy) return true;
-      if (sq.man && sq.man.canCastle) return true;
+      if (!man || occupiedByEnemy) return true;
+      if (man && !man.hasMoved && man.canCastle) return true;
     });
 
     if (squares.length === validSquares.length) return squares[2];

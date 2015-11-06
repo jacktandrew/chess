@@ -9,3 +9,5 @@ var white = chess.team.white = new chess.Pieces('white'),
 chess.setup.init(board, boardEl, white, black);
 
 chess.game = new chess.Game(board);
+
+chess.ui.init();
