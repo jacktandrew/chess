@@ -7,10 +7,10 @@ window.chess.pawn = {
     return advances.concat(captures, enPassant);
   },
   getCaptures: function(sq) {
-    var enemy = chess.game.turn.enemy,
+    var color = sq.man.color,
       possible = chess.game.seekOne(sq.coords, sq.man.moves.captures);
       captures = possible.filter(function(sq) {
-        if (sq && sq.man && sq.man.color === enemy) return true;
+        if (sq && sq.man && sq.man.color !== color) return true;
       });
     return captures;
   },

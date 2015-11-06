@@ -4,7 +4,7 @@ window.chess.notation = {
   previous: undefined,
   logEl: document.querySelector('.log'),
   record: function(sqObj) {
-    var inCheck = chess.check.get(chess.game.turn.enemy);
+    var inCheck = chess.check.get(chess.ui.turn.enemy);
     if (!this.current) this.current = this.getNote(sqObj);
 
     if (inCheck) this.current += '+';
@@ -19,9 +19,9 @@ window.chess.notation = {
   },
   getNote: function(sqObj) {
     var abbr = sqObj.man.abbr || '',
-      fileName = chess.game.turn.sqObj.name[0];
+      fileName = sqObj.name[0];
 
-    if (chess.game.captured) {
+    if (chess.ui.turn.captured) {
       note = abbr + 'x' + sqObj.name;
       if (!abbr) note = fileName + 'x' + sqObj.name;
     } else {

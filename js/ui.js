@@ -2,8 +2,19 @@
 var chess = window.chess = window.chess || {};
 
 chess.ui =  {
+  counter: 0,
+  teams: ['white', 'black'],
   init: function() {
+  	this.resetTurn();
     document.body.addEventListener('click', this, false);
+  },
+  resetTurn: function() {
+    this.turn = {
+      enemy: this.teams[1 - this.counter],
+      color: this.teams[this.counter],
+      squares: [],
+      castling: []
+    };
   },
   handleEvent: function(event) {
     var sqEl = event.target;
@@ -18,14 +29,15 @@ chess.ui =  {
   },
   handleSquare: function(sqEl) {
   	var sqObj = chess.board[sqEl.dataset.name],
-  		validMove = chess.game.turn.squares.indexOf(sqObj) + 1,
+  		validMove = this.turn.squares.indexOf(sqObj) + 1,
 	  	possibleMoves, start;
 
 		if (validMove) {
-			start = chess.game.turn.squares[0];
-			chess.game.movePiece(start, sqObj);
+			chess.game.movePiece(this.turn.start, sqObj);
+	    this.endTurn(sqObj);
 		} else {
 			this.deactivate();
+			this.turn.start = sqObj;
 			possibleMoves = chess.game.getMoves(sqObj);
 			this.activate(sqObj, possibleMoves);
 		}
@@ -33,52 +45,49 @@ chess.ui =  {
   old: function(sqEl) {
     // var sqObj = chess.board[sqEl.dataset.name],
     //   possibleMoves = chess.game.getMoves(sqObj),
-    //   validMove = chess.game.turn.squares.indexOf(sqObj) + 1,
+    //   validMove = this.turn.squares.indexOf(sqObj) + 1,
     //   enPassant = chess.pawn.enPassant.moveSq === sqObj,
-    //   castling = chess.game.turn.castling.indexOf(sqObj) + 1,
+    //   castling = this.turn.castling.indexOf(sqObj) + 1,
     //   inCheck;
 
-    // chess.game.turn.push(sqObj);
+    // this.turn.push(sqObj);
     // this.activate(results);
 
     // if (!validMove) return false;
-    // chess.game.movePiece(chess.game.turn.sqObj, sqObj);
-    // inCheck = chess.check.get(chess.game.turn.color);
+    // chess.game.movePiece(this.turn.sqObj, sqObj);
+    // inCheck = chess.check.get(this.turn.color);
     // if (castling) chess.castling.moveRook(sqObj);
     // if (enPassant) chess.pawn.completePass();
-    // if (inCheck) chess.check.reverseMove(chess.game.turn.sqObj, sqObj);
+    // if (inCheck) chess.check.reverseMove(this.turn.sqObj, sqObj);
     // else chess.game.endTurn(sqObj);
   },
   activate: function(target, squares) {
-    chess.game.turn.squares = squares.filter(function(sq) {
-      if (!sq.man || sq.man.color === chess.game.turn.enemy) {
+  	var color = target.man.color;
+
+    this.turn.squares = squares.filter(function(sq) {
+      if (!sq.man || sq.man.color !== color) {
         sq.el.classList.add('active');
         return true;
       }
     });
+
     target.el.children[0].classList.add('active');
-    chess.game.turn.squares.unshift(target);
   },
   deactivate: function() {
-    u.each(chess.game.turn.squares, function(sq) {
+    u.each(this.turn.squares, function(sq) {
       sq.el.classList.remove('active');
       if (sq.el.children[0])
 	      sq.el.children[0].classList.remove('active');
     });
-		chess.game.turn.squares = [];
+		this.turn.squares = [];
   },
-  parseEvent: function(sqEl, manEl) {
-    // var sqObj = chess.game.getObject(manEl),
-    //   isActive = chess.game.turn.sqObj === sqObj;
-
-    // if (sqObj.man.color === chess.game.turn.enemy) {
-    //   chess.game.checkCapture(manEl, sqObj);
-    //   chess.game.handleSquare(sqEl);
-    // } else if (sqObj.man.color === chess.game.turn.color) {
-    //   if (chess.game.turn.manEl) chess.game.deactivate();
-    //   if (!isActive) chess.game.handleMan(manEl);
-    // }
-  },
+  endTurn: function(sqObj) {
+    chess.promotion.inquire(sqObj);
+    chess.notation.record(sqObj);
+    this.deactivate();
+    this.counter = 1 - this.counter;
+    this.resetTurn();
+  }
 }
 
 })();

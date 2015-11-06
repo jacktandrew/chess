@@ -7,56 +7,21 @@ chess.Game = Game;
 
 Game.prototype = {
   constructor: Game,
-  counter: 0,
-  teams: ['white', 'black'],
   init: function() {
-    this.resetTurn();
   },
-  switchTurn: function() {
-    this.counter = 1 - this.counter;
-    this.captured = undefined;
-    this.resetTurn();
-  },
-  resetTurn: function() {
-    this.turn = {
-      enemy: this.teams[1 - this.counter],
-      color: this.teams[this.counter],
-      squares: [],
-      castling: []
-    };
-  },
-  movePiece: function(srcObj, dstObj) {
-    srcObj.man.hasMoved = true;
+  movePiece: function(src, dst) {
+    src.man.hasMoved = true;
     //  Put man on target square in HTML
-    dstObj.el.appendChild(srcObj.el.children[0]);
-    console.log(srcObj, dstObj);
+    if (dst.man) this.capture(dst);
+    dst.el.appendChild(src.el.children[0]);
     //  Update model
-    dstObj.man = srcObj.man;
-    srcObj.man = undefined;
+    dst.man = src.man;
+    src.man = undefined;
   },
-  endTurn: function(sqObj) {
-    chess.promotion.inquire(sqObj);
-    chess.notation.record(sqObj);
-    this.deactivate();
-    this.switchTurn();
-  },
-  checkCapture: function(manEl, sqObj) {
-    var isActiveSq = this.turn.squares.indexOf(sqObj) + 1;
-    if (isActiveSq) this.capture(manEl, sqObj)
-  },
-  capture: function(manEl, sqObj) {
-    this.turn.man = sqObj.man;
-    this.captured = {
-      el: manEl,
-      man: sqObj.man
-    };
-    sqObj.el.removeChild(manEl);
+  capture: function(sqObj) {
+    chess.ui.turn.captured = sqObj.man;
+    sqObj.el.removeChild(sqObj.el.children[0]);
     sqObj.man = undefined;
-  },
-  getObject: function(manEl) {
-    var sqEl = manEl.parentElement,
-      name = sqEl.dataset.name;
-    return chess.board[name];
   },
   getMoves: function(sq) {
     var results, castling;
@@ -70,7 +35,7 @@ Game.prototype = {
 
     if (sq.man.name === 'king' && !this.inCheck) {
       castling = chess.castling.get(sq);
-      this.turn.castling = castling;
+      chess.ui.turn.castling = castling;
       results = castling.concat(results);
     }
 
