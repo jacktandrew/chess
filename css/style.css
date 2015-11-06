@@ -22,6 +22,8 @@ html { font-size: 15px; }
   background-color: lemonchiffon;
 }
 
+.square * { pointer-events: none; }
+
 .square .man { position: absolute; }
 
 .man i {

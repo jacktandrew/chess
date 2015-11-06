@@ -85,6 +85,13 @@ window.u = window.utils = {
     else
       return u.extend({}, obj);
   },
+  getManEl: function(name, color) {
+    var results = u.filter(chess.board, function(sq) {
+      var man = sq.man || {};
+      if (man.color === color && man.name === name) return true;
+    });
+    return results[0].el.children[0];
+  },
   loopRank: function(board, rank, func) {
     var letters = ['a','b','c','d','e','f','g','h'],
       letter, name, square;

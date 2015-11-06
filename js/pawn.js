@@ -15,12 +15,12 @@ window.chess.pawn = {
     return captures;
   },
   getAdvances: function(sq) {
-    var possible = chess.game.seekOne(sq.coords, sq.man.moves.advances);
+    var pawn = sq.man,
+      possible = chess.game.seekOne(sq.coords, pawn.moves.advances);
 
-    return possible.filter(function(move, i) {
-      if (!move) return false;
-      if (!move.man && i === 0) return true;
-      if (!move.man && !sq.man.hasMoved) return true;
+    return possible.filter(function(sq, i) {
+      if (!sq.man && i === 0) return true;
+      if (!possible[0].man && !sq.man && !pawn.hasMoved) return true;
     });
   },
   getEnPassant: function(sq) {
@@ -49,8 +49,6 @@ window.chess.pawn = {
     return move;
   },
   completePass: function() {
-    chess.game.movePiece(chess.ui.turn.start, this.enPassant.moveSq);
     chess.game.capture(this.enPassant.manSq);
-    chess.ui.endTurn(this.enPassant.moveSq);
   }
 };

@@ -19,8 +19,13 @@ Game.prototype = {
     src.man = undefined;
   },
   capture: function(sqObj) {
-    chess.ui.turn.captured = sqObj.man;
-    sqObj.el.removeChild(sqObj.el.children[0]);
+    var manEl = sqObj.el.children[0];
+    chess.ui.turn.captured = {
+      el: manEl,
+      manObj: sqObj.man
+    };
+
+    sqObj.el.removeChild(manEl);
     sqObj.man = undefined;
   },
   getMoves: function(sq) {

@@ -3,27 +3,26 @@ window.chess.check = {
   getSqByMan: function(name, color) {
     var results = u.filter(chess.board, function(sq) {
       var man = sq.man || {};
-      if (man.color === color && man.name === name)
-        return true;
+      if (man.color === color && man.name === name) return true;
     });
     return results[0]
   },
   get: function(color) {
     var kingSq = this.getSqByMan('king', color),
-      threats = this.seekThreats(kingSq, color),
-      hasUncheck;
+      threats = this.seekThreats(kingSq, color);
+      // hasUncheck;
 
-    if (threats) {
-      hasUncheck = this.findUncheck(kingSq, threats);
-      if (!hasUncheck) return this.alertMate();
-    }
+    // if (threats) {
+    //   hasUncheck = this.findUncheck(kingSq, threats);
+    //   if (!hasUncheck) return this.alertMate();
+    // }
 
     return threats;
   },
   alertMate: function() {
-    var modal = chess.render.getModal(chess.game.turn.color);
+    var modal = chess.render.getModal(chess.ui.turn.color);
     modal.classList.add('mate');
-    modal.innerHTML = chess.game.turn.color.toUpperCase() + ' WINS';
+    modal.innerHTML = chess.ui.turn.color.toUpperCase() + ' WINS';
     document.body.classList.add('modal');
     document.body.appendChild(modal);
   },
@@ -48,26 +47,6 @@ window.chess.check = {
         if (squares.indexOf(target) + 1) return true;
       });
     if (real.length) return real;
-  },
-  reverseMove: function(srcObj, dstObj) {
-    var kingObj = this.getSqByMan('king', dstObj.man.color),
-      kingEl = kingObj.el.children[0];
-
-    kingEl.classList.add('active');
-    chess.game.deactivate();
-
-    setTimeout(function() {
-      srcObj.el.appendChild(dstObj.el.children[0]);
-      srcObj.man = dstObj.man;
-      dstObj.man = undefined;
-      if (chess.game.turn.captured) {
-        dstObj.man = chess.game.turn.captured.man;
-        dstObj.el.appendChild(chess.game.turn.captured.el);
-        chess.game.turn.captured = undefined;
-      }
-      chess.game.deactivate();
-      kingEl.classList.remove('active');
-    }, 400);
   },
   getEscapes: function(kingSq) {
     var king = kingSq.man,
@@ -155,8 +134,6 @@ window.chess.check = {
     var escapes = this.getEscapes(kingSq),
       captures = this.getCaptureOfThreat(threats),
       blocks = this.getBlockOfThreat(kingSq, threats);
-
-    console.log(escapes, captures, blocks);
 
     if (escapes || captures || blocks) return true;
   }
