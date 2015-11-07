@@ -1,122 +1,41 @@
-var team = 1;
+(function(){
+  var chess = window.chess = window.chess || {},
+    counter = 0, duration = 5;
 
-var longNotation = [];
+  u.ajax('games/byrne_fischer_1956.pgn', handle);
 
-u.ajax('json/immortal.json', function(string) {
-  game = JSON.parse(string);
-  u.each(game, function(move) {
-    white = makeLong(move[0]);
-    black = makeLong(move[1]);
-    longNotation.push([white, black]);
-  });
-
-  longNotation.forEach(function(t) {
-    // console.log(t[0],t[1]);
-  })
-});
-
-function makeLong(move) {
-  var l, man, file, rank;
-  move = move.replace(/\#|\?+|\!+|\++/g,'');
-  l = move.length - 1;
-  man = move.match(/[B-R]/);
-  file = move.match(/[a-h]/);
-  rank = move[l];
-  team = 1 - team;
-
-  if (!file) return parseCastling(move, team);
-  if (!man) return parsePawnMove(move, team);
-
-  return getPrev(team, man[0], file[0], rank);
-}
-
-function parsePawnMove(move, team) {
-  if (move.match(/x/)) return parsePawnCatpure(move, team);
-  var dirs = [1,-1],
-    dir = dirs[team],
-    end = parseInt(move[1]),
-    rank = end - dir,
-    prev = checkDoubleMove(move[0], rank, team, dir);
-
-  return [prev, move[0] + move[1]];
-}
-
-function checkDoubleMove(file, rank, team, dir) {
-  var prev = file + rank,
-    arr = longNotation.filter(function(turn) {
-      if (turn[team] && prev === turn[team][1]) return true;
-    });
-
-  if (!arr.length) {
-    rank = rank - dir;
-    prev = file + rank;
+  function handle(data) {
+    var string = data.replace(/\[.*\]|\n/g, ''),
+      moves = string.split(' '),
+      outcome = moves.pop();
+    u.each(moves, parse);
   }
 
-  return prev
-}
+  function parse(move) {
+    var sq1 = chess.board[move.slice(0,2)],
+      sq2 = chess.board[move.slice(2)];
 
-function parsePawnCatpure(move, team) {
-  var dirs = [1,-1],
-    dir = dirs[team],
-    end = parseInt(move[3]),
-    rank = end - dir;
+    setTimeout(function() {
+      checkIfCastling(sq1, sq2);
+      chess.game.movePiece(sq1, sq2);
+    }, counter * duration);
 
-  return [move[0] + rank, move[2] + move[3]];
-}
+    counter++;
+  }
 
-var movements = {
-  diagonal: [
-    [1,1],    //  NE
-    [1,-1],   //  SE
-    [-1,-1],  //  SW
-    [-1,1]    //  NW
-  ],
-  straight: [
-    [1,0],    //  right
-    [-1,0],   //  left
-    [0,1],    //  forward
-    [0,-1]    //  back
-  ],
-  l_shaped: [
-    [1,2],    //  1 o'clock
-    [2,1],    //  2 o'clock
-    [2,-1],   //  4 o'clock
-    [1,-2],   //  5 o'clock
-    [-1,-2],  //  7 o'clock
-    [-2,-1],  //  8 o'clock
-    [-2,1],   //  10 o'clock
-    [-1,2]    //  11 o'clock
-  ],
-};
-var files = ['a','b','c','d','e','f','g','h'];
-var start = {
-  file: ['R','N','B','Q','K','B','N','R'],
-  rank: [1,8]
-};
+  function checkIfCastling(sq1, sq2) {
+    var isKing = sq1.man.name === 'king',
+      diff = sq2.coords[0] - sq1.coords[0],
+      files = { '2': ['h','f'], '-2': ['a','d'] },
+      rank, file1, file2, cSq1, cSq2;
 
-var paths = {
-  R: movements.straight,
-  B: movements.diagonal,
-  N: movements.l_shaped,
-  Q: movements.straight.concat(movements.diagonal),
-  K: movements.straight.concat(movements.diagonal)
-}
-
-function getPrev(team, man, file, rank) {
-  var start = [
-
-  ];
-  console.log(team, man, file, rank);
-}
-
-function parseCastling(move, team) {
-  var teams = [{
-      '0-0':   [['e1','g1'],['h1','f1']],
-      '0-0-0': [['e1','c1'],['a1','d1']]
-    },{
-      '0-0':   [['e8','g8'],['h8','f8']],
-      '0-0-0': [['e8','c8'],['a8','d8']]
-    }],
-    coord = teams[team][move];
-  if (coord) return coord;
-}
+    if (isKing && Math.abs(diff) === 2) {
+      rank = sq1.name[1];
+      file1 = files[diff][0];
+      file2 = files[diff][1];
+      cSq1 = chess.board[file1 + rank];
+      cSq2 = chess.board[file2 + rank];
+      chess.game.movePiece(cSq1, cSq2);
+    }
+  }
+})();
