@@ -28,6 +28,7 @@ chess.ui =  {
   handleMove: function(sqObj) {
     this.checkForTheUnusual(sqObj);
     chess.game.movePiece(this.turn.start, sqObj);
+    connection.send(this.turn.start.name + sqObj.name);
     this.endTurn(sqObj);
   },
   handleSelect: function(sqObj) {

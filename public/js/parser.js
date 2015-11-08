@@ -1,8 +1,10 @@
 (function(){
   var chess = window.chess = window.chess || {},
-    counter = 0, duration = 5;
+    secondsPerMove = 0.01,
+    desiredNumber = 20,
+    counter = 0;
 
-  u.ajax('games/byrne_fischer_1956.pgn', handle);
+  // u.ajax('games/byrne_fischer_1956.pgn', handle);
 
   function handle(data) {
     var string = data.replace(/\[.*\]|\n/g, ''),
@@ -15,10 +17,12 @@
     var sq1 = chess.board[move.slice(0,2)],
       sq2 = chess.board[move.slice(2)];
 
+    if (counter === desiredNumber) return false;
+
     setTimeout(function() {
       checkIfCastling(sq1, sq2);
       chess.game.movePiece(sq1, sq2);
-    }, counter * duration);
+    }, counter * 1000 * secondsPerMove);
 
     counter++;
   }

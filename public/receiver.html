@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+<script src="js/lib/peer.min.js"></script>
+<script>
+var peer = new Peer('receiver_id', {
+  host: 'localhost',
+  port: 9000,
+  path: '/peerjs'
+});
+
+var connection;
+
+peer.on('connection', function(conn) {
+  conn.on('data', function(data) {
+    console.log('on data', data);
+  });
+  connection = conn;
+});
+
+
+</script>
+</body>
+</html>
