@@ -1,4 +1,8 @@
-window.chess.read = {
+'use strict';
+
+var chess = window.chess = window.chess || {};
+
+chess.read = {
 	counter: 0,
 	moves: [
 	],

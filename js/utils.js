@@ -1,4 +1,6 @@
-window.u = window.utils = {
+'use strict';
+
+var u = window.u = window.utils = {
   combine: function(arr1, arr2) {
     u.each(arr1, function(val1, i) {
       arr2[i] += val1;

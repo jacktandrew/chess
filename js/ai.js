@@ -1,4 +1,8 @@
-window.chess.ai = {
+'use strict';
+
+var chess = window.chess = window.chess || {};
+
+chess.ai = {
 	counter: 0,
 	white: [
 		['e2', 'e4'],
