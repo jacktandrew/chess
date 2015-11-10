@@ -1,4 +1,6 @@
 (function(){
+'use strict';
+
   var chess = window.chess = window.chess || {};
 
   chess.render = {

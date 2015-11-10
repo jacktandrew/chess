@@ -1,4 +1,8 @@
-window.chess.notation = {
+'use strict';
+
+var chess = window.chess = window.chess || {};
+
+chess.notation = {
   notes: [],
   current: undefined,
   previous: undefined,
@@ -19,7 +23,8 @@ window.chess.notation = {
   },
   getNote: function(sqObj) {
     var abbr = sqObj.man.abbr || '',
-      fileName = sqObj.name[0];
+      fileName = sqObj.name[0],
+      note;
 
     if (chess.ui.turn.captured) {
       note = abbr + 'x' + sqObj.name;

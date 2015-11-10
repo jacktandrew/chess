@@ -1,4 +1,8 @@
-window.chess.check = {
+'use strict';
+
+var chess = window.chess = window.chess || {};
+
+chess.check = {
   isMate: false,
   getSqByMan: function(name, color) {
     var results = u.filter(chess.board, function(sq) {
@@ -36,9 +40,9 @@ window.chess.check = {
   seekThreats: function(target, ownTeam, moveType) {
     moveType = moveType || 'captures';
     var proto = chess.Pieces.prototype,
-      l_shaped = chess.game.seekOne(target.coords, proto.l_shaped),
-      diagonal = chess.game.seekMany(target.coords, proto.diagonal),
-      straight = chess.game.seekMany(target.coords, proto.straight),
+      l_shaped = chess.ui.seekOne(target.coords, proto.l_shaped),
+      diagonal = chess.ui.seekMany(target.coords, proto.diagonal),
+      straight = chess.ui.seekMany(target.coords, proto.straight),
       squares = l_shaped.concat(diagonal, straight),
       threats = squares.filter(function(sq) {
         if (sq.man && sq.man.color !== ownTeam) return true;
@@ -47,9 +51,9 @@ window.chess.check = {
         var deltas = sq.man.moves[moveType] || sq.man.moves;
 
         if (sq.man.repeat)
-          squares = chess.game.seekMany(sq.coords, deltas);
+          squares = chess.ui.seekMany(sq.coords, deltas);
         else
-          squares = chess.game.seekOne(sq.coords, deltas);
+          squares = chess.ui.seekOne(sq.coords, deltas);
 
         if (squares.indexOf(target) + 1) return true;
       });
@@ -57,7 +61,7 @@ window.chess.check = {
   },
   getEscapes: function(kingSq) {
     var king = kingSq.man,
-      kingMoves = chess.game.seekOne(kingSq.coords, king.moves),
+      kingMoves = chess.ui.seekOne(kingSq.coords, king.moves),
       escapes = kingMoves.filter(function(sq) {
         kingSq.man = undefined;
         var inCheck = chess.check.seekThreats(sq, king.color);

@@ -1,4 +1,8 @@
-window.chess.promotion = {
+'use strict';
+
+var chess = window.chess = window.chess || {};
+
+chess.promotion = {
   rank: { black: 0, white: 7 },
   handle: function() {
     chess.promotion.finish(sqEl);

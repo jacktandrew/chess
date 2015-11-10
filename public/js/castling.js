@@ -1,4 +1,8 @@
-window.chess.castling = {
+'use strict';
+
+var chess = window.chess = window.chess || {};
+
+chess.castling = {
   get: function(sqObj) {
     var rank = sqObj.coords[1] + 1,
       qSide = [], kSide = [], castlingSq = [];

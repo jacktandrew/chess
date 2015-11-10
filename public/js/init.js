@@ -1,4 +1,7 @@
-var boardEl = document.querySelector('.board'),
+'use strict';
+
+var chess = window.chess = window.chess || {},
+	boardEl = document.querySelector('.board'),
   board = chess.board = new chess.Board();
 
 chess.team = {};

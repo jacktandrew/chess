@@ -1,4 +1,6 @@
 (function(){
+'use strict';
+
   var chess = window.chess = window.chess || {};
 
   function Pieces(color) { return this.init(color); }

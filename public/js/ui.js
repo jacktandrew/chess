@@ -1,4 +1,6 @@
 (function(){
+'use strict';
+
 var chess = window.chess = window.chess || {};
 
 chess.ui =  {
@@ -31,12 +33,61 @@ chess.ui =  {
     connection.send(this.turn.start.name + sqObj.name);
     this.endTurn(sqObj);
   },
+  getMoves: function(sq) {
+    var results;
+
+    if (sq.man.name === 'pawn')
+      results = chess.pawn.getMoves(sq);
+    else if (sq.man.name === 'king')
+      results = this.getKingMoves(sq);
+    else if (sq.man.repeat)
+      results = this.seekMany(sq.coords, sq.man.moves);
+    else
+      results = this.seekOne(sq.coords, sq.man.moves);
+
+    return results;
+  },
+  getKingMoves: function(sq, results) {
+    var results = chess.ui.seekOne(sq.coords, sq.man.moves),
+      castling;
+
+    if (!sq.man.hasMoved) {
+      castling = chess.castling.get(sq);
+      chess.ui.turn.castling = castling;
+      results = results.concat(castling);
+    }
+
+    return chess.check.filterKingMoves(sq.man, results);
+  },
+  seekOne: function(start, deltas) {
+    var squares = deltas.map(function(delta) {
+      var coord = [start[0]+delta[0], start[1]+delta[1]];
+      return chess.board.getSq(coord);
+    });
+
+    return squares.filter(function(sq) { if (sq) return true });
+  },
+  seekMany: function(p0, deltas, squares) {
+    squares = squares || [];
+
+    u.each(deltas, function(p1) {
+      var coord = [p0[0]+p1[0], p0[1]+p1[1]],
+        sq = chess.board.getSq(coord);
+
+      if (sq) {
+        squares.push(sq);
+        if (!sq.man) chess.ui.seekMany(coord, [p1], squares);
+      }
+    });
+
+    return squares.filter(function(sq) { if (sq) return true });
+  },
   handleSelect: function(sqObj) {
     var possibleMoves;
     if (sqObj.man.color !== this.turn.color) return false;
     this.deactivate();
     this.turn.start = sqObj;
-    possibleMoves = chess.game.getMoves(sqObj);
+    possibleMoves = this.getMoves(sqObj);
     this.activate(sqObj, possibleMoves);
   },
   checkForTheUnusual: function(sqObj) {
